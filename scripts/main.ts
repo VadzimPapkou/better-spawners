@@ -1,6 +1,7 @@
 import { world, ItemStack, Player, Entity, EntityInitializationCause, Block, BlockVolume } from "@minecraft/server";
 import { dropBlockItem } from "./block-drop";
 import { log } from "./utils";
+import { initSpawnerParticles } from "./spawner-particles";
 
 const brokenSpawners = new Map<Player, ItemStack>();
 
@@ -58,3 +59,5 @@ world.afterEvents.entitySpawn.subscribe((event) => {
         log("spawner type:", entity.typeId);
     }
 });
+
+initSpawnerParticles();

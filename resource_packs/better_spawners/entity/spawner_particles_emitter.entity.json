@@ -1,0 +1,28 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:client_entity": {
+        "description": {
+            "identifier": "better_spawners:spawner_particles_emitter",
+            "materials": {
+                "default": "entity_alphatest"
+            },
+            "textures": {
+                "default": "textures/blocks/mob_spawner"
+            },
+            "geometry": {
+                "default": "geometry.better_spawners.empty"
+            },
+            "animations": {
+                "particles": "controller.animation.better_spawners.spawner_particles"
+            },
+            "particle_effects": {
+                "flame": "better_spawners:spawner_ambient_flame",
+                "smoke": "better_spawners:spawner_ambient_smoke"
+            },
+            "scripts": {
+                "animate": ["particles"]
+            },
+            "render_controllers": ["controller.render.default"]
+        }
+    }
+}

@@ -1,0 +1,13 @@
+{
+    "format_version": "1.10.0",
+    "animation_controllers": {
+        "controller.animation.better_spawners.spawner_particles": {
+            "initial_state": "ambient",
+            "states": {
+                "ambient": {
+                    "particle_effects": [{ "effect": "flame" }, { "effect": "smoke" }]
+                }
+            }
+        }
+    }
+}
