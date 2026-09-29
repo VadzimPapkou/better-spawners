@@ -1,5 +1,6 @@
-import { world, ItemStack, Player } from "@minecraft/server";
+import { world, ItemStack, Player, Entity, EntityInitializationCause, Block, BlockVolume } from "@minecraft/server";
 import { dropBlockItem } from "./block-drop";
+import { log } from "./utils";
 
 const brokenSpawners = new Map<Player, ItemStack>();
 
@@ -27,5 +28,33 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
 
         dropBlockItem(event.dimension, event.block.location, itemStack);
         brokenSpawners.delete(player);
+    }
+});
+
+const spawnerTypes = new Map<Block, string>();
+
+/** 9×9 горизонталь (±4), 4 по высоте (−1..+2) */
+function findNearestSpawner(entity: Entity): Block | undefined {
+    const { x, y, z } = entity.location;
+    const volume = new BlockVolume({ x: x - 4, y: y - 1, z: z - 4 }, { x: x + 4, y: y + 2, z: z + 4 });
+
+    const found = entity.dimension.getBlocks(volume, {
+        includeTypes: ["minecraft:mob_spawner"],
+        closest: 1,
+        location: entity.location,
+    });
+
+    const first = found.getBlockLocationIterator().next();
+    if (first.done) return undefined;
+    return entity.dimension.getBlock(first.value);
+}
+
+world.afterEvents.entitySpawn.subscribe((event) => {
+    const entity = event.entity;
+    if (event.cause === EntityInitializationCause.Spawned) {
+        const spawner = findNearestSpawner(entity);
+        if (!spawner) return;
+        spawnerTypes.set(spawner, entity.typeId);
+        log("spawner type:", entity.typeId);
     }
 });

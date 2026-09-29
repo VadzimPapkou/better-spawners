@@ -5,9 +5,15 @@
         "description": "Better Spawners behavior pack",
         "uuid": "c0248e7a-6b56-49a8-b22f-ea3237878a19",
         "version": [1, 0, 0],
-        "min_engine_version": [1, 21, 120]
+        "min_engine_version": [1, 26, 20]
     },
     "modules": [
+        {
+            "description": "Behavior data",
+            "type": "data",
+            "uuid": "a3e1c9f2-7b4d-4e8a-9f1c-2d6b8e0a5c71",
+            "version": [1, 0, 0]
+        },
         {
             "description": "Script resources",
             "language": "javascript",
@@ -18,6 +24,10 @@
         }
     ],
     "dependencies": [
+        {
+            "uuid": "f77fab30-79f1-45a7-bb68-9d24f6341e21",
+            "version": [1, 0, 0]
+        },
         {
             "module_name": "@minecraft/server",
             "version": "2.0.0"
