@@ -1,0 +1,24 @@
+{
+    "format_version": 2,
+    "header": {
+        "name": "Better Spawners Resources",
+        "description": "Better Spawners resource pack",
+        "uuid": "f77fab30-79f1-45a7-bb68-9d24f6341e21",
+        "version": [1, 0, 0],
+        "min_engine_version": [1, 20, 30]
+    },
+    "modules": [
+        {
+            "description": "Resources",
+            "type": "resources",
+            "uuid": "72684459-67f4-4904-85b9-d6708277c12c",
+            "version": [1, 0, 0]
+        }
+    ],
+    "dependencies": [
+        {
+            "uuid": "c0248e7a-6b56-49a8-b22f-ea3237878a19",
+            "version": [1, 0, 0]
+        }
+    ]
+}
