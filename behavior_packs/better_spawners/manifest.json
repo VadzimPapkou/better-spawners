@@ -5,7 +5,7 @@
         "description": "Better Spawners behavior pack",
         "uuid": "c0248e7a-6b56-49a8-b22f-ea3237878a19",
         "version": [1, 0, 0],
-        "min_engine_version": [1, 20, 30]
+        "min_engine_version": [1, 21, 120]
     },
     "modules": [
         {
@@ -21,6 +21,18 @@
         {
             "module_name": "@minecraft/server",
             "version": "2.0.0"
+        },
+        {
+            "module_name": "@minecraft/server",
+            "version": "beta"
+        },
+        {
+            "module_name": "@minecraft/server-ui",
+            "version": "2.0.0"
+        },
+        {
+            "module_name": "@minecraft/server-ui",
+            "version": "beta"
         }
     ]
 }
