@@ -22,7 +22,18 @@
             },
             "minecraft:block_entity": {
                 "dynamic_properties": true
-            }
+            },
+            "minecraft:destructible_by_mining": {
+                "seconds_to_destroy": 5
+            },
+            "minecraft:destructible_by_explosion": {
+                "explosion_resistance": 5
+            },
+            "minecraft:movable": {
+                "movement_type": "immovable"
+            },
+            "minecraft:loot": "loot_tables/blocks/mob_spawner.json",
+            "minecraft:tags": ["minecraft:is_pickaxe_item_destructible"]
         }
     }
 }
