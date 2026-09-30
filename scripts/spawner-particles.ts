@@ -1,16 +1,20 @@
-import { VanillaEntityIdentifier, world } from "@minecraft/server";
+import { Dimension, VanillaEntityIdentifier, Vector3, world } from "@minecraft/server";
 
 const CUSTOM_SPAWNER_ID = "better_spawners:mob_spawner";
 const PARTICLES_EMITTER_ENTITY_ID = "better_spawners:spawner_particles_emitter";
 
+export function spawnSpawnerParticles(dimension: Dimension, location: Vector3): void {
+    dimension.spawnEntity(PARTICLES_EMITTER_ENTITY_ID as VanillaEntityIdentifier, {
+        x: location.x + 0.5,
+        y: location.y + 0.5,
+        z: location.z + 0.5,
+    });
+}
+
 export function initSpawnerParticles(): void {
     world.afterEvents.playerPlaceBlock.subscribe((event) => {
         if (event.block.typeId !== CUSTOM_SPAWNER_ID) return;
-        event.dimension.spawnEntity(PARTICLES_EMITTER_ENTITY_ID as VanillaEntityIdentifier, {
-            x: event.block.location.x + 0.5,
-            y: event.block.location.y + 0.5,
-            z: event.block.location.z + 0.5,
-        });
+        spawnSpawnerParticles(event.dimension, event.block.location);
     });
 
     world.afterEvents.playerBreakBlock.subscribe((event) => {

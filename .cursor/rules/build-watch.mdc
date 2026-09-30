@@ -1,0 +1,23 @@
+---
+description: After script changes, check local-deploy watch terminal for TS errors
+alwaysApply: true
+---
+
+# Build watch
+
+После правок в `scripts/` смотри терминал с `npm run local-deploy -- --watch`.
+
+Как узнать что это он: в метаданных `active_command: npm run local-deploy -- --watch`, в выводе циклы `watch-task` → `typescript` → `bundle` → `package` → `Waiting for new changes...`.
+
+**Ок:**
+
+```
+[12:31:03] ■ finished 'typescript' in 0.51s
+...
+[12:31:03] ■ finished 'watch-task' in 0.6s
+[12:31:03] ■ Waiting for new changes...
+```
+
+**Ошибка:** строки `error TS…`, затем `x finished 'typescript' … with errors` / `x finished 'build' … with errors`. Исправь и перечитай терминал, пока снова не будет `■ finished` + `Waiting for new changes...`.
+
+Если такого терминала нет (нет `active_command` с `local-deploy`) — напиши в чат запустить `npm run local-deploy -- --watch`. Не запускай билд сам.
