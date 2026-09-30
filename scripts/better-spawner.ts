@@ -1,7 +1,6 @@
 import { Block, Dimension, system, VanillaEntityIdentifier, Vector3 } from "@minecraft/server";
 import { randomInteger } from "./utils/randomInteger";
 import { MinecraftEntityTypes } from "@minecraft/vanilla-data";
-import { log } from "./utils/log";
 
 const PARTICLES_EMITTER_ENTITY_ID = "better_spawners:spawner_particles_emitter";
 const PARTICLES_COMPONENT_ID = "better_spawners:spawner_particles";
@@ -17,9 +16,17 @@ const BETTER_SPAWNER_DP = {
 const TICKS_PER_BETTER_SPAWNER_TICK = 20;
 const DEFAULT_MIN_SPAWN_DELAY = 60;
 const DEFAULT_MAX_SPAWN_DELAY = 60;
-const DEFAULT_SPAWN_RANGE = 9;
-const DEFAULT_SPAWN_COUNT = 2;
+const DEFAULT_SPAWN_RANGE = 4;
+const DEFAULT_SPAWN_COUNT = 4;
 const DEFAULT_MAX_COUNT = 6;
+
+/** Vanilla Bedrock spawn FX (resource_pack/particles/mob_block_spawn.json). Classic mob_spawner has no spawn sound. */
+const SPAWN_FLAME_PARTICLE = "minecraft:basic_flame_particle";
+const SPAWN_SMOKE_PARTICLE = "minecraft:basic_smoke_particle";
+/** White poof on the mob — vanilla emitter already fires 20 particles. */
+const MOB_SPAWN_EMITTER = "minecraft:mob_block_spawn_emitter";
+const SPAWNER_SPAWN_FLAME_COUNT = 20;
+const SPAWNER_NW_SMOKE_COUNT = 20;
 
 export function spawnSpawnerParticles(dimension: Dimension, location: Vector3): void {
     dimension.spawnEntity(PARTICLES_EMITTER_ENTITY_ID as VanillaEntityIdentifier, {
@@ -85,6 +92,38 @@ export function initBetterSpawner(): void {
     });
 }
 
+/**
+ * Bedrock mob_spawner on successful spawn (per mob):
+ * - burst of basic_flame_particle around the spawner
+ * - basic_smoke_particle from the northwest corner of the block
+ * - minecraft:mob_block_spawn_emitter at the mob (white poofs; vanilla num_particles: 20)
+ */
+function playVanillaSpawnerSpawnFx(dimension: Dimension, spawnerLocation: Vector3, mobLocation: Vector3): void {
+    const spawnerCenter = {
+        x: spawnerLocation.x + 0.5,
+        y: spawnerLocation.y + 0.5,
+        z: spawnerLocation.z + 0.5,
+    };
+
+    for (let i = 0; i < SPAWNER_SPAWN_FLAME_COUNT; i++) {
+        dimension.spawnParticle(SPAWN_FLAME_PARTICLE, {
+            x: spawnerCenter.x + Math.random() - 0.5,
+            y: spawnerCenter.y + Math.random() - 0.5,
+            z: spawnerCenter.z + Math.random() - 0.5,
+        });
+    }
+
+    for (let i = 0; i < SPAWNER_NW_SMOKE_COUNT; i++) {
+        dimension.spawnParticle(SPAWN_SMOKE_PARTICLE, {
+            x: spawnerLocation.x + Math.random() * 0.25,
+            y: spawnerLocation.y + Math.random(),
+            z: spawnerLocation.z + Math.random() * 0.25,
+        });
+    }
+
+    dimension.spawnParticle(MOB_SPAWN_EMITTER, mobLocation);
+}
+
 function spawnMobs(spawnerBlock: Block, mobId: string, spawnCount: number, maxCount: number, spawnRange: number) {
     const { dimension, location } = spawnerBlock;
     const nearby = dimension.getEntities({
@@ -103,14 +142,15 @@ function spawnMobs(spawnerBlock: Block, mobId: string, spawnCount: number, maxCo
         };
         const feet = dimension.getBlock(pos);
         const head = dimension.getBlock({ ...pos, y: pos.y + 1 });
-        const below = dimension.getBlock({ ...pos, y: pos.y - 1 });
-        if (!feet?.isAir || !head?.isAir || !below || below.isAir) continue;
+        if (!feet?.isAir || !head?.isAir) continue;
 
-        dimension.spawnEntity(mobId as VanillaEntityIdentifier, {
+        const mobLocation = {
             x: pos.x + 0.5,
             y: pos.y,
             z: pos.z + 0.5,
-        });
+        };
+        dimension.spawnEntity(mobId as VanillaEntityIdentifier, mobLocation);
+        playVanillaSpawnerSpawnFx(dimension, location, mobLocation);
         canSpawn--;
     }
 }

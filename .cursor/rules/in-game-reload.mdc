@@ -1,5 +1,5 @@
 ---
-description: After pack/script edits, reload world via Bedrock MCP when connected
+description: MUST after every scripts/ edit check watch terminal, then MCP /reload all or paste /connect
 alwaysApply: true
 ---
 
