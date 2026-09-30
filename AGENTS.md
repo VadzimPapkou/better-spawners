@@ -1,3 +1,9 @@
+# Цель проекта
+
+Воссоздать логику [Apothic Spawners](https://www.curseforge.com/minecraft/mc-mods/apothic-spawners) на Minecraft Bedrock.
+
+Кастомный спавнер делать как можно ближе к ванильному: поведение, визуал, интеракции — сначала ванильный паритет, потом апгрейды/фичи Apothic поверх него.
+
 # Agent checklist
 
 После правок pack/script/content (BP/RP/JSON/TS):
