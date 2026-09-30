@@ -1,6 +1,5 @@
 import { EquipmentSlot, GameMode, system, world } from "@minecraft/server";
 import { MinecraftItemTypes } from "@minecraft/vanilla-data";
-import { spawnSpawnerParticles } from "../spawner-particles";
 
 const CUSTOM_SPAWNER_ID = "better_spawners:mob_spawner";
 
@@ -17,7 +16,6 @@ export function initOnPlayerInteractWithSpawner(): void {
             if (!block.isValid || block.typeId !== "minecraft:mob_spawner") return;
 
             block.setType(CUSTOM_SPAWNER_ID);
-            spawnSpawnerParticles(block.dimension, block.location);
 
             if (player.getGameMode() === GameMode.Creative) return;
 

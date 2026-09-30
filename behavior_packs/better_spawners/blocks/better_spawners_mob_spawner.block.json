@@ -33,7 +33,8 @@
                 "movement_type": "immovable"
             },
             "minecraft:loot": "loot_tables/blocks/mob_spawner.json",
-            "minecraft:tags": ["minecraft:is_pickaxe_item_destructible"]
+            "minecraft:tags": ["minecraft:is_pickaxe_item_destructible"],
+            "better_spawners:spawner_particles": {}
         }
     }
 }
