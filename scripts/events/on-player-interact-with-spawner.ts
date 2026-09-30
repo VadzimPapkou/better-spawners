@@ -1,5 +1,6 @@
 import { EquipmentSlot, GameMode, system, world } from "@minecraft/server";
 import { MinecraftItemTypes } from "@minecraft/vanilla-data";
+import { inferredSpawnerTypes } from "../inferred-spawner-types";
 
 const CUSTOM_SPAWNER_ID = "better_spawners:mob_spawner";
 
@@ -11,11 +12,17 @@ export function initOnPlayerInteractWithSpawner(): void {
 
         const player = event.player;
         const block = event.block;
+        const spawnerType = inferredSpawnerTypes.get(block);
+        if (!spawnerType) {
+            player.sendMessage("§cThis spawner has to spawn at least one mob in order to be converted");
+            return;
+        }
 
         system.run(() => {
             if (!block.isValid || block.typeId !== "minecraft:mob_spawner") return;
 
             block.setType(CUSTOM_SPAWNER_ID);
+            player.sendMessage("§aSpawner converted to custom spawner");
 
             if (player.getGameMode() === GameMode.Creative) return;
 

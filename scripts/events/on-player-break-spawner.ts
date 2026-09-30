@@ -6,9 +6,6 @@ const brokenSpawners = new Map<Player, ItemStack>();
 export function initOnPlayerBreakSpawner(): void {
     world.beforeEvents.playerBreakBlock.subscribe((event) => {
         const block = event.block;
-        block.getComponents().forEach((component) => {
-            console.log(component.typeId);
-        });
         if (block.typeId !== "minecraft:mob_spawner") return;
         const itemStack = block.getItemStack(1, true)!;
 
