@@ -5,7 +5,15 @@
             "initial_state": "ambient",
             "states": {
                 "ambient": {
-                    "particle_effects": [{ "effect": "flame" }, { "effect": "smoke" }]
+                    "particle_effects": [{ "effect": "flame" }, { "effect": "smoke" }],
+                    "transitions": [
+                        { "idle": "q.mark_variant == 0"}
+                    ]
+                },
+                "idle": {
+                    "transitions": [
+                        { "ambient": "q.mark_variant == 1"}
+                    ]
                 }
             }
         }
