@@ -1,0 +1,58 @@
+{
+    "format_version": "1.21.80",
+    "minecraft:block_culling_rules": {
+        "description": {
+            "identifier": "better_spawners:culling.mob_spawner"
+        },
+        "rules": [
+            {
+                "direction": "north",
+                "geometry_part": {
+                    "bone": "block",
+                    "cube": 0,
+                    "face": "north"
+                }
+            },
+            {
+                "direction": "south",
+                "geometry_part": {
+                    "bone": "block",
+                    "cube": 0,
+                    "face": "south"
+                }
+            },
+            {
+                "direction": "east",
+                "geometry_part": {
+                    "bone": "block",
+                    "cube": 0,
+                    "face": "east"
+                }
+            },
+            {
+                "direction": "west",
+                "geometry_part": {
+                    "bone": "block",
+                    "cube": 0,
+                    "face": "west"
+                }
+            },
+            {
+                "direction": "up",
+                "geometry_part": {
+                    "bone": "block",
+                    "cube": 0,
+                    "face": "up"
+                }
+            },
+            {
+                "direction": "down",
+                "geometry_part": {
+                    "bone": "block",
+                    "cube": 0,
+                    "face": "down"
+                }
+            }
+        ]
+    }
+}
