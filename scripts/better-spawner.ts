@@ -67,6 +67,15 @@ export function initBetterSpawner(): void {
                     return console.error("No minecraft:dynamic_properties component found");
                 }
 
+                const spawnerBlock = event.block;
+                const center = {
+                    x: spawnerBlock.location.x + 0.5,
+                    y: spawnerBlock.location.y + 0.5,
+                    z: spawnerBlock.location.z + 0.5,
+                };
+                const players = spawnerBlock.dimension.getPlayers({ location: center, maxDistance: 16 });
+                if (players.length === 0) return;
+
                 const minSpawnDelay = Number(blockDp.get(BETTER_SPAWNER_DP.MIN_SPAWN_DELAY)) || DEFAULT_MIN_SPAWN_DELAY;
                 const maxSpawnDelay = Number(blockDp.get(BETTER_SPAWNER_DP.MAX_SPAWN_DELAY)) || DEFAULT_MAX_SPAWN_DELAY;
                 const spawnCount = Number(blockDp.get(BETTER_SPAWNER_DP.SPAWN_COUNT)) || DEFAULT_SPAWN_COUNT;

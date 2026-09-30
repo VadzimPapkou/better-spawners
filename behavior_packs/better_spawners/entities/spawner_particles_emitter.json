@@ -19,12 +19,12 @@
                 "find_players_only": true,
                 "subsensors": [
                     {
-                        "range": [16, 16],
+                        "range": [14, 14],
                         "minimum_count": 1,
                         "event": "better_spawners:has_player_in_range"
                     },
                     {
-                        "range": [16, 16],
+                        "range": [14, 14],
                         "minimum_count": 0,
                         "maximum_count": 0,
                         "event": "better_spawners:no_player_in_range"

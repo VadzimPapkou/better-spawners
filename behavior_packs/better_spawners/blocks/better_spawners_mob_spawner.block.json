@@ -9,7 +9,7 @@
         },
         "components": {
             "minecraft:geometry": {
-                "identifier": "minecraft:geometry.full_block",
+                "identifier": "geometry.better_spawners.mob_spawner",
                 "culling": "better_spawners:culling.mob_spawner"
             },
             "minecraft:material_instances": {

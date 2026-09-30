@@ -1,11 +1,11 @@
 ---
-description: MUST after every scripts/ edit check watch terminal, then MCP /reload all or paste /connect
+description: MUST once at end of turn after pack/script edits — MCP /reload all or paste /connect
 alwaysApply: true
 ---
 
 # In-game reload (Bedrock MCP)
 
-After pack/script/content edits that need a world refresh (and after watch has finished — see `build-watch.mdc`):
+After pack/script/content edits that need a world refresh: finish all edits first, wait for watch if needed (`build-watch.mdc`), then reload **once at the end of your turn** — not after every file, not mid-work.
 
 1. If the world is connected via Bedrock MCP (`user-minecraft-bedrock`): run `/reload all` (`execute_command`), then `send_message` a short status (e.g. `reload done` / `релоад сделан`). Mention reload briefly in the reply to the user. Do not wait for the user to ask.
 2. If MCP/world is **not** connected (`needsAuth`, unavailable, or clearly offline): ask the user to connect and always paste the command so they can copy it:
