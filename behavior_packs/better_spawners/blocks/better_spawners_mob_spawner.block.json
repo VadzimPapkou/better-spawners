@@ -14,10 +14,8 @@
             },
             "minecraft:material_instances": {
                 "*": {
-                    "texture": "better_spawners:mob_spawner",
-                    "render_method": "alpha_test",
-                    "ambient_occlusion": 0,
-                    "face_dimming": false
+                    "texture": "mob_spawner",
+                    "render_method": "alpha_test"
                 }
             },
             "minecraft:block_entity": {
