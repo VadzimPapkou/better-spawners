@@ -124,16 +124,27 @@ function playVanillaSpawnerSpawnFx(dimension: Dimension, spawnerLocation: Vector
     dimension.spawnParticle(MOB_SPAWN_EMITTER, mobLocation);
 }
 
+/** Vanilla MaxNearbyEntities box: (SpawnRange*2+1) × (SpawnRange*2+1) × 8, centered on the spawner block. */
+function countNearbySameType(dimension: Dimension, location: Vector3, mobId: string, spawnRange: number): number {
+    const sizeXZ = spawnRange * 2 + 1;
+    const sizeY = 8;
+    return dimension.getEntities({
+        type: mobId,
+        location: {
+            x: location.x - spawnRange,
+            y: location.y - 3.5,
+            z: location.z - spawnRange,
+        },
+        volume: { x: sizeXZ, y: sizeY, z: sizeXZ },
+    }).length;
+}
+
 function spawnMobs(spawnerBlock: Block, mobId: string, spawnCount: number, maxCount: number, spawnRange: number) {
     const { dimension, location } = spawnerBlock;
-    const nearby = dimension.getEntities({
-        type: mobId,
-        location: { x: location.x + 0.5, y: location.y + 0.5, z: location.z + 0.5 },
-        maxDistance: spawnRange,
-    });
-    if (nearby.length >= maxCount) return;
+    const nearbyCount = countNearbySameType(dimension, location, mobId, spawnRange);
+    if (nearbyCount >= maxCount) return;
 
-    let canSpawn = maxCount - nearby.length;
+    let canSpawn = maxCount - nearbyCount;
     for (let i = 0; i < spawnCount && canSpawn > 0; i++) {
         const pos = {
             x: Math.floor(location.x + (Math.random() - Math.random()) * spawnRange),
