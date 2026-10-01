@@ -82,6 +82,85 @@ function countNearbySameType(dimension: Dimension, location: Vector3, mobId: str
     }).length;
 }
 
+// #region Light levels
+/**
+ * Bedrock vanilla `minecraft:brightness_filter` from spawn_rules.
+ * Missing id → default hostile `{ max: 7 }`.
+ */
+type MobLightRange = { min?: number; max?: number };
+
+const LIGHT_HOSTILE: MobLightRange = { max: 7 };
+const LIGHT_ANIMAL: MobLightRange = { min: 7 };
+const LIGHT_ANY: MobLightRange = {};
+
+const ANIMALS = [
+    "cow",
+    "chicken",
+    "pig",
+    "sheep",
+    "rabbit",
+    "horse",
+    "donkey",
+    "mule",
+    "llama",
+    "trader_llama",
+    "wolf",
+    "ocelot",
+    "cat",
+    "fox",
+    "panda",
+    "parrot",
+    "polar_bear",
+    "goat",
+    "turtle",
+    "bee",
+    "armadillo",
+    "camel",
+    "sniffer",
+    "frog",
+];
+
+const ANY_LIGHT = [
+    "blaze",
+    "magma_cube",
+    "slime",
+    "ghast",
+    "piglin",
+    "piglin_brute",
+    "hoglin",
+    "strider",
+    "silverfish",
+    "endermite",
+    "shulker",
+    "guardian",
+    "elder_guardian",
+    "squid",
+    "glow_squid",
+    "dolphin",
+    "axolotl",
+    "cod",
+    "salmon",
+    "tropicalfish",
+    "pufferfish",
+    "tadpole",
+];
+
+const MOB_LIGHT_LEVELS: Record<string, MobLightRange> = {
+    "minecraft:bat": { max: 4 },
+    "minecraft:zombie_pigman": { max: 11 },
+    "minecraft:mooshroom": { min: 9 },
+};
+for (const id of ANIMALS) MOB_LIGHT_LEVELS[`minecraft:${id}`] = LIGHT_ANIMAL;
+for (const id of ANY_LIGHT) MOB_LIGHT_LEVELS[`minecraft:${id}`] = LIGHT_ANY;
+// #endregion
+
+function passesLightCheck(mobId: string, lightLevel: number): boolean {
+    const range = MOB_LIGHT_LEVELS[mobId] ?? LIGHT_HOSTILE;
+    if (range.min !== undefined && lightLevel < range.min) return false;
+    if (range.max !== undefined && lightLevel > range.max) return false;
+    return true;
+}
+
 export function spawnMobs(
     spawnerBlock: Block,
     mobId: string,
@@ -103,6 +182,7 @@ export function spawnMobs(
         const feet = dimension.getBlock(pos);
         const head = dimension.getBlock({ ...pos, y: pos.y + 1 });
         if (!feet?.isAir || !head?.isAir) continue;
+        if (!passesLightCheck(mobId, feet.getLightLevel())) continue;
 
         const mobLocation = {
             x: pos.x + 0.5,
