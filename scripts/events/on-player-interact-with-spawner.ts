@@ -1,6 +1,7 @@
 import { EquipmentSlot, GameMode, system, world } from "@minecraft/server";
 import { MinecraftItemTypes } from "@minecraft/vanilla-data";
 import { inferredSpawnerTypes } from "../inferred-spawner-types";
+import { BETTER_SPAWNER_DP } from "../better-spawner-utils";
 
 const CUSTOM_SPAWNER_ID = "better_spawners:mob_spawner";
 
@@ -22,6 +23,12 @@ export function initOnPlayerInteractWithSpawner(): void {
             if (!block.isValid || block.typeId !== "minecraft:mob_spawner") return;
 
             block.setType(CUSTOM_SPAWNER_ID);
+            const blockDp = block.getComponent("minecraft:dynamic_properties");
+            if (!blockDp) {
+                return console.error("No minecraft:dynamic_properties component found");
+            }
+            blockDp.set(BETTER_SPAWNER_DP.MOB_ID, spawnerType);
+            blockDp.set(BETTER_SPAWNER_DP.BEFORE_NEXT_SPAWN_TICKS, 200);
             player.sendMessage("§aSpawner converted to custom spawner");
 
             if (player.getGameMode() === GameMode.Creative) return;

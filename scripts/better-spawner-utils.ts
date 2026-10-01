@@ -194,3 +194,19 @@ export function spawnMobs(
         canSpawn--;
     }
 }
+export const PARTICLES_COMPONENT_ID = "better_spawners:spawner_particles";
+export const BETTER_SPAWNER_DP = {
+    MIN_SPAWN_DELAY: "min_spawn_delay",
+    MAX_SPAWN_DELAY: "max_spawn_delay",
+    SPAWN_COUNT: "spawn_count",
+    MAX_COUNT: "max_count",
+    BEFORE_NEXT_SPAWN_TICKS: "before_next_spawn_countdown",
+    SPAWN_RANGE: "spawn_range",
+    MOB_ID: "mob_id",
+};
+export const TICKS_PER_BETTER_SPAWNER_TICK = 20;
+export const DEFAULT_MIN_SPAWN_DELAY = 1000;
+export const DEFAULT_MAX_SPAWN_DELAY = 1000;
+export const DEFAULT_SPAWN_RANGE = 4;
+export const DEFAULT_SPAWN_COUNT = 4;
+export const DEFAULT_MAX_COUNT = 6;

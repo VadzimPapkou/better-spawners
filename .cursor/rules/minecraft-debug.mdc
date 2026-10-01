@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Minecraft script debug
 
-Дебаг скриптов — через `scripts/utils/log.ts` (`log(...)`), не через произвольный `console.log` в новых местах.
+Дебаг скриптов — через `scripts/utils/log.ts` (`log(...)`), не через произвольный `console.log` в новых местах и **не** через `fetch`/HTTP ingest (в Script API это не работает как дебаг-канал).
 
 `log` = `console.warn` → в ContentLog строка вида:
 

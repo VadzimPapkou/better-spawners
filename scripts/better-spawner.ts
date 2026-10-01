@@ -1,24 +1,19 @@
 import { system } from "@minecraft/server";
 import { MinecraftEntityTypes } from "@minecraft/vanilla-data";
 import { randomInteger } from "./utils/randomInteger";
-import { removeSpawnerParticles, spawnMobs, spawnSpawnerParticles } from "./better-spawner-utils";
-
-const PARTICLES_COMPONENT_ID = "better_spawners:spawner_particles";
-const BETTER_SPAWNER_DP = {
-    MIN_SPAWN_DELAY: "min_spawn_delay",
-    MAX_SPAWN_DELAY: "max_spawn_delay",
-    SPAWN_COUNT: "spawn_count",
-    MAX_COUNT: "max_count",
-    BEFORE_NEXT_SPAWN_TICKS: "before_next_spawn_countdown",
-    SPAWN_RANGE: "spawn_range",
-    MOB_ID: "mob_id",
-};
-const TICKS_PER_BETTER_SPAWNER_TICK = 20;
-const DEFAULT_MIN_SPAWN_DELAY = 1000;
-const DEFAULT_MAX_SPAWN_DELAY = 1000;
-const DEFAULT_SPAWN_RANGE = 4;
-const DEFAULT_SPAWN_COUNT = 4;
-const DEFAULT_MAX_COUNT = 6;
+import {
+    BETTER_SPAWNER_DP,
+    DEFAULT_MAX_COUNT,
+    DEFAULT_MAX_SPAWN_DELAY,
+    DEFAULT_MIN_SPAWN_DELAY,
+    DEFAULT_SPAWN_COUNT,
+    DEFAULT_SPAWN_RANGE,
+    PARTICLES_COMPONENT_ID,
+    removeSpawnerParticles,
+    spawnMobs,
+    spawnSpawnerParticles,
+    TICKS_PER_BETTER_SPAWNER_TICK,
+} from "./better-spawner-utils";
 
 export function initBetterSpawner(): void {
     system.beforeEvents.startup.subscribe(({ blockComponentRegistry }) => {
@@ -59,10 +54,7 @@ export function initBetterSpawner(): void {
                     spawnMobs(event.block, mobId, spawnCount, maxCount, spawnRange);
                     blockDp.set(BETTER_SPAWNER_DP.BEFORE_NEXT_SPAWN_TICKS, randomInteger(minSpawnDelay, maxSpawnDelay));
                 } else {
-                    blockDp.set(
-                        BETTER_SPAWNER_DP.BEFORE_NEXT_SPAWN_TICKS,
-                        beforeNextSpawnTicks - TICKS_PER_BETTER_SPAWNER_TICK
-                    );
+                    blockDp.set(BETTER_SPAWNER_DP.BEFORE_NEXT_SPAWN_TICKS, beforeNextSpawnTicks);
                 }
             },
         });
