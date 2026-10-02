@@ -1,19 +1,26 @@
-import { system } from "@minecraft/server";
-import { MinecraftEntityTypes } from "@minecraft/vanilla-data";
-import { randomInteger } from "./utils/randomInteger";
+import { BlockPermutation, GameMode, ItemStack, system, world } from "@minecraft/server";
+import { MinecraftBlockTypes } from "@minecraft/vanilla-data";
+import { randomInteger } from "./utils/random-integer";
 import {
-    BETTER_SPAWNER_DP,
-    DEFAULT_MAX_COUNT,
-    DEFAULT_MAX_SPAWN_DELAY,
-    DEFAULT_MIN_SPAWN_DELAY,
-    DEFAULT_SPAWN_COUNT,
-    DEFAULT_SPAWN_RANGE,
     PARTICLES_COMPONENT_ID,
     removeSpawnerParticles,
     spawnMobs,
     spawnSpawnerParticles,
+    getBetterSpawnerDp,
+    setBetterSpawnerDp,
     TICKS_PER_BETTER_SPAWNER_TICK,
+    BETTER_SPAWNER_ITEM_ID,
 } from "./better-spawner-utils";
+import { hasSilkTouch } from "./utils/has-silk-touch";
+import { dropBlockItem } from "./utils/drop-block-item";
+import { dropBlockExperience } from "./utils/drop-block-experience";
+import { getMainhandItem } from "./utils/get-mainhand-item";
+import { consumeMainhandItem } from "./utils/consume-mainhand-item";
+import { spawnEggToMobId } from "./utils/spawn-egg-to-mob-id";
+
+/** Vanilla monster spawner XP when broken with a pickaxe (no Silk Touch). */
+const SPAWNER_BREAK_XP_MIN = 15;
+const SPAWNER_BREAK_XP_MAX = 43;
 
 export function initBetterSpawner(): void {
     system.beforeEvents.startup.subscribe(({ blockComponentRegistry }) => {
@@ -25,11 +32,6 @@ export function initBetterSpawner(): void {
                 removeSpawnerParticles(event.dimension, event.block.location);
             },
             onTick: (event) => {
-                const blockDp = event.block.getComponent("minecraft:dynamic_properties");
-                if (!blockDp) {
-                    return console.error("No minecraft:dynamic_properties component found");
-                }
-
                 const spawnerBlock = event.block;
                 const center = {
                     x: spawnerBlock.location.x + 0.5,
@@ -39,24 +41,71 @@ export function initBetterSpawner(): void {
                 const players = spawnerBlock.dimension.getPlayers({ location: center, maxDistance: 16 });
                 if (players.length === 0) return;
 
-                const minSpawnDelay = Number(blockDp.get(BETTER_SPAWNER_DP.MIN_SPAWN_DELAY)) || DEFAULT_MIN_SPAWN_DELAY;
-                const maxSpawnDelay = Number(blockDp.get(BETTER_SPAWNER_DP.MAX_SPAWN_DELAY)) || DEFAULT_MAX_SPAWN_DELAY;
-                const spawnCount = Number(blockDp.get(BETTER_SPAWNER_DP.SPAWN_COUNT)) || DEFAULT_SPAWN_COUNT;
-                const maxCount = Number(blockDp.get(BETTER_SPAWNER_DP.MAX_COUNT)) || DEFAULT_MAX_COUNT;
-                const spawnRange = Number(blockDp.get(BETTER_SPAWNER_DP.SPAWN_RANGE)) || DEFAULT_SPAWN_RANGE;
-                const beforeNextSpawnTicksDp = Number(blockDp.get(BETTER_SPAWNER_DP.BEFORE_NEXT_SPAWN_TICKS));
-                const mobId = String(blockDp.get(BETTER_SPAWNER_DP.MOB_ID) || MinecraftEntityTypes.Zombie);
+                const spawnerDp = getBetterSpawnerDp(spawnerBlock);
+                if (!spawnerDp.mobId) return;
 
-                const beforeNextSpawnTicks = beforeNextSpawnTicksDp
-                    ? beforeNextSpawnTicksDp - TICKS_PER_BETTER_SPAWNER_TICK
+                const beforeNextSpawnTicks = spawnerDp.beforeNextSpawnTicks
+                    ? spawnerDp.beforeNextSpawnTicks - TICKS_PER_BETTER_SPAWNER_TICK
                     : 0;
                 if (beforeNextSpawnTicks <= 0) {
-                    spawnMobs(event.block, mobId, spawnCount, maxCount, spawnRange);
-                    blockDp.set(BETTER_SPAWNER_DP.BEFORE_NEXT_SPAWN_TICKS, randomInteger(minSpawnDelay, maxSpawnDelay));
+                    spawnMobs(
+                        event.block,
+                        spawnerDp.mobId,
+                        spawnerDp.spawnCount,
+                        spawnerDp.maxCount,
+                        spawnerDp.spawnRange
+                    );
+                    setBetterSpawnerDp(
+                        spawnerBlock,
+                        "beforeNextSpawnTicks",
+                        randomInteger(spawnerDp.minSpawnDelay, spawnerDp.maxSpawnDelay)
+                    );
                 } else {
-                    blockDp.set(BETTER_SPAWNER_DP.BEFORE_NEXT_SPAWN_TICKS, beforeNextSpawnTicks);
+                    setBetterSpawnerDp(spawnerBlock, "beforeNextSpawnTicks", beforeNextSpawnTicks);
                 }
             },
+        });
+    });
+
+    world.beforeEvents.playerBreakBlock.subscribe((event) => {
+        if (event.block.typeId !== BETTER_SPAWNER_ITEM_ID) return;
+
+        const heldItem = getMainhandItem(event.player);
+
+        if (!hasSilkTouch(heldItem) && event.player.getGameMode() !== GameMode.Creative) {
+            if (heldItem?.hasTag("minecraft:is_pickaxe")) {
+                const { dimension } = event;
+                const location = { ...event.block.location };
+                system.run(() => {
+                    dropBlockExperience(dimension, location, randomInteger(SPAWNER_BREAK_XP_MIN, SPAWNER_BREAK_XP_MAX));
+                });
+            }
+            return;
+        }
+
+        event.cancel = true;
+
+        system.run(() => {
+            event.block.setPermutation(BlockPermutation.resolve(MinecraftBlockTypes.Air));
+            dropBlockItem(event.dimension, event.block.location, new ItemStack(BETTER_SPAWNER_ITEM_ID));
+        });
+    });
+
+    world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
+        if (event.block.typeId !== BETTER_SPAWNER_ITEM_ID) return;
+        if (!event.isFirstEvent) return;
+
+        const heldItemId = getMainhandItem(event.player)?.typeId;
+
+        if (!heldItemId) return;
+        const mobId = spawnEggToMobId(heldItemId);
+        if (!mobId) return;
+        event.cancel = true;
+        system.run(() => {
+            if (heldItemId !== getMainhandItem(event.player)?.typeId) return;
+            if (event.block.typeId !== BETTER_SPAWNER_ITEM_ID) return;
+            if (!setBetterSpawnerDp(event.block, "mobId", mobId)) return;
+            consumeMainhandItem(event.player, heldItemId);
         });
     });
 }

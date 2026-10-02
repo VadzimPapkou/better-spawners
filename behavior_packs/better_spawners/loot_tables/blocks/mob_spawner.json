@@ -1,25 +1,3 @@
 {
-    "pools": [
-        {
-            "rolls": 1,
-            "conditions": [
-                {
-                    "condition": "match_tool",
-                    "enchantments": [{ "enchantment": "silk_touch" }]
-                }
-            ],
-            "entries": [
-                {
-                    "type": "item",
-                    "name": "better_spawners:mob_spawner",
-                    "functions": [
-                        {
-                            "function": "carry_over_block_entity_data",
-                            "dynamic_properties": true
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
+    "pools": []
 }

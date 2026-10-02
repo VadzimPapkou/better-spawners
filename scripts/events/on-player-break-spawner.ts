@@ -1,5 +1,6 @@
 import { world, ItemStack, Player, GameMode } from "@minecraft/server";
-import { dropBlockItem } from "../utils/dropBlockItem";
+import { dropBlockItem } from "../utils/drop-block-item";
+import { hasSilkTouch } from "../utils/has-silk-touch";
 
 const brokenSpawners = new Map<Player, ItemStack>();
 
@@ -15,25 +16,20 @@ export function initOnPlayerBreakSpawner(): void {
     world.afterEvents.playerBreakBlock.subscribe((event) => {
         const player = event.player;
         const brokenTypeId = event.brokenBlockPermutation.type.id;
+        const itemStack = brokenSpawners.get(player);
+        brokenSpawners.delete(player);
 
         if (
             brokenTypeId === "minecraft:mob_spawner" &&
             hasSilkTouch(event.itemStackBeforeBreak) &&
             player.getGameMode() !== GameMode.Creative
         ) {
-            const itemStack = brokenSpawners.get(player);
             if (!itemStack) {
                 console.error("No broken spawner found for player", player.name);
                 return;
             }
 
             dropBlockItem(event.dimension, event.block.location, itemStack);
-            brokenSpawners.delete(player);
         }
     });
-}
-
-function hasSilkTouch(itemStack: ItemStack | undefined): boolean {
-    if (!itemStack) return false;
-    return itemStack.getComponent("minecraft:enchantable")?.hasEnchantment("silk_touch") ?? false;
 }
