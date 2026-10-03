@@ -16,6 +16,7 @@ import {
     SPAWNER_BREAK_XP_MAX,
     SPAWNER_BREAK_XP_MIN,
     BetterSpawnerStats,
+    initOrphanSpawnerParticlesCleanup,
 } from "./better-spawner-utils";
 import { hasSilkTouch } from "../utils/has-silk-touch";
 import { dropBlockItem } from "../utils/drop-block-item";
@@ -31,6 +32,8 @@ import { isObject } from "../utils/is-object";
 const beforePlayerPlaceItemStack: Map<string, ItemStack> = new Map();
 
 export function initBetterSpawner(): void {
+    initOrphanSpawnerParticlesCleanup();
+
     system.beforeEvents.startup.subscribe(({ blockComponentRegistry }) => {
         blockComponentRegistry.registerCustomComponent(PARTICLES_COMPONENT_ID, {
             onPlace: (event) => {
@@ -63,8 +66,6 @@ export function initBetterSpawner(): void {
                 system.runTimeout(() => {
                     removeSpawnerParticles(event.dimension, event.block.location);
                 }, 40);
-
-                system.runJob
             },
             onTick: (event) => {
                 const spawnerBlock = event.block;

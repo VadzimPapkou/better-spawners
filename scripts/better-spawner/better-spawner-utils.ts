@@ -1,7 +1,20 @@
-import { Block, BlockComponentTypes, Dimension, ItemStack, Vector3 } from "@minecraft/server";
+import {
+    Block,
+    BlockComponentTypes,
+    Dimension,
+    DimensionTypes,
+    ItemStack,
+    system,
+    Vector3,
+    world,
+} from "@minecraft/server";
 import { randomInteger } from "../utils/random-integer";
 
 const PARTICLES_EMITTER_ENTITY_ID = "better_spawners:spawner_particles_emitter";
+/** 30s between orphan particle sweeps. */
+const ORPHAN_PARTICLES_CLEANUP_INTERVAL_TICKS = 600;
+/** Match onBreak grace so ambient FX can finish fading. */
+const ORPHAN_PARTICLES_REMOVE_DELAY_TICKS = 40;
 
 /** Vanilla Bedrock spawn FX (resource_pack/particles/mob_block_spawn.json). Classic mob_spawner has no spawn sound. */
 const SPAWN_FLAME_PARTICLE = "minecraft:basic_flame_particle";
@@ -45,6 +58,34 @@ export function setSpawnerParticlesActive(dimension: Dimension, location: Vector
 
 export function removeSpawnerParticles(dimension: Dimension, location: Vector3): void {
     getSpawnerParticlesEmitter(dimension, location)?.remove();
+}
+
+/** Periodically remove particle emitters that no longer sit inside a better spawner block. */
+export function initOrphanSpawnerParticlesCleanup(): void {
+    system.runInterval(() => {
+        for (const dimensionType of DimensionTypes.getAll()) {
+            const dimension = world.getDimension(dimensionType.typeId);
+            for (const entity of dimension.getEntities({ type: PARTICLES_EMITTER_ENTITY_ID })) {
+                const blockLocation = {
+                    x: Math.floor(entity.location.x),
+                    y: Math.floor(entity.location.y),
+                    z: Math.floor(entity.location.z),
+                };
+                let block: Block | undefined;
+                try {
+                    block = dimension.getBlock(blockLocation);
+                } catch {
+                    continue;
+                }
+                if (block?.typeId === BETTER_SPAWNER_ITEM_ID) continue;
+
+                entity.triggerEvent("better_spawners:no_player_in_range");
+                system.runTimeout(() => {
+                    if (entity.isValid) entity.remove();
+                }, ORPHAN_PARTICLES_REMOVE_DELAY_TICKS);
+            }
+        }
+    }, ORPHAN_PARTICLES_CLEANUP_INTERVAL_TICKS);
 }
 
 /**
