@@ -1,6 +1,6 @@
 import { BlockPermutation, GameMode, ItemStack, system, world } from "@minecraft/server";
 import { MinecraftBlockTypes } from "@minecraft/vanilla-data";
-import { randomInteger } from "./utils/random-integer";
+import { randomInteger } from "../utils/random-integer";
 import {
     PARTICLES_COMPONENT_ID,
     removeSpawnerParticles,
@@ -11,12 +11,12 @@ import {
     TICKS_PER_BETTER_SPAWNER_TICK,
     BETTER_SPAWNER_ITEM_ID,
 } from "./better-spawner-utils";
-import { hasSilkTouch } from "./utils/has-silk-touch";
-import { dropBlockItem } from "./utils/drop-block-item";
-import { dropBlockExperience } from "./utils/drop-block-experience";
-import { getMainhandItem } from "./utils/get-mainhand-item";
-import { consumeMainhandItem } from "./utils/consume-mainhand-item";
-import { spawnEggToMobId } from "./utils/spawn-egg-to-mob-id";
+import { hasSilkTouch } from "../utils/has-silk-touch";
+import { dropBlockItem } from "../utils/drop-block-item";
+import { dropBlockExperience } from "../utils/drop-block-experience";
+import { getMainhandItem } from "../utils/get-mainhand-item";
+import { consumeMainhandItem } from "../utils/consume-mainhand-item";
+import { spawnEggToMobId } from "../utils/spawn-egg-to-mob-id";
 
 /** Vanilla monster spawner XP when broken with a pickaxe (no Silk Touch). */
 const SPAWNER_BREAK_XP_MIN = 15;

@@ -1,5 +1,5 @@
 import { Block, Dimension, Vector3 } from "@minecraft/server";
-import { randomInteger } from "./utils/random-integer";
+import { randomInteger } from "../utils/random-integer";
 
 const PARTICLES_EMITTER_ENTITY_ID = "better_spawners:spawner_particles_emitter";
 

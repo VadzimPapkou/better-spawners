@@ -1,9 +1,8 @@
 import { world, Entity, EntityInitializationCause, Block, BlockVolume } from "@minecraft/server";
-import { log } from "../utils/log";
-import { inferredSpawnerTypes } from "../inferred-spawner-types";
+import { inferredSpawnerTypes } from "./inferred-spawner-types";
 
 function findNearbySpawners(entity: Entity): Block[] {
-    if(!entity.isValid) return [];
+    if (!entity.isValid) return [];
     const { x, y, z } = entity.location;
     const volume = new BlockVolume({ x: x - 4, y: y - 1, z: z - 4 }, { x: x + 4, y: y + 2, z: z + 4 });
 
