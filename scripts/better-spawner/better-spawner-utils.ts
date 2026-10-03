@@ -220,6 +220,87 @@ export type BetterSpawnerStats = {
 
 export type BetterSpawnerStatsKey = keyof BetterSpawnerStats;
 
+export type NumericModKey = Extract<
+    BetterSpawnerStatsKey,
+    "minSpawnDelay" | "maxSpawnDelay" | "spawnCount" | "maxCount" | "requiredPlayerRange" | "spawnRange"
+>;
+
+export type SpawnerModifier = {
+    itemId: string;
+    displayName: string;
+    statKey: NumericModKey;
+    delta: number;
+    min?: number;
+    max?: number;
+    inverseDelta: number;
+    inverseMin?: number;
+    inverseMax?: number;
+};
+
+export const SPAWNER_MODIFIERS: SpawnerModifier[] = [
+    {
+        itemId: "minecraft:sugar",
+        displayName: "Min Spawn Delay",
+        statKey: "minSpawnDelay",
+        delta: -10,
+        min: 20,
+        inverseDelta: 10,
+        inverseMax: 1600,
+    },
+    {
+        itemId: "minecraft:clock",
+        displayName: "Max Spawn Delay",
+        statKey: "maxSpawnDelay",
+        delta: -20,
+        min: 20,
+        inverseDelta: 20,
+        inverseMax: 1600,
+    },
+    {
+        itemId: "minecraft:fermented_spider_eye",
+        displayName: "Spawn Count",
+        statKey: "spawnCount",
+        delta: 2,
+        max: 16,
+        inverseDelta: -2,
+        inverseMin: 1,
+    },
+    {
+        itemId: "minecraft:ghast_tear",
+        displayName: "Max Entities",
+        statKey: "maxCount",
+        delta: 2,
+        max: 32,
+        inverseDelta: -2,
+        inverseMin: 1,
+    },
+    {
+        itemId: "minecraft:prismarine_crystals",
+        displayName: "Activation Range",
+        statKey: "requiredPlayerRange",
+        delta: 4,
+        max: 48,
+        inverseDelta: -4,
+        inverseMin: 1,
+    },
+    {
+        itemId: "minecraft:piston",
+        displayName: "Spawn Range",
+        statKey: "spawnRange",
+        delta: 2,
+        max: 32,
+        inverseDelta: -2,
+        inverseMin: 1,
+    },
+];
+
+export const MODIFIER_BY_ITEM = new Map(SPAWNER_MODIFIERS.map((m) => [m.itemId, m]));
+
+/** Apothic-style "§aName: §7value" (lore prefixes with §r). */
+export function formatStatDisplay(name: string, value: number | string): string {
+    return `§a${name}: §7${value}`;
+}
+
 /** Storage ids for block dynamic properties (must match BP). */
 export const BETTER_SPAWNER_STATS = {
     mobId: "mob_id",
@@ -306,24 +387,8 @@ export function setBetterSpawnerStats<K extends BetterSpawnerStatsKey>(
     return true;
 }
 
-/**
- * Apothic Spawners item tooltip format (SpawnerStat.createTooltip):
- * green name + ": " + gray value, e.g. "§r§aMin Spawn Delay: §7200"
- * Order matches SpawnerStats.REGISTRY for the vanilla stats we store.
- */
 export function setBetterSpawnerLore(itemStack: ItemStack, spawnerStats: BetterSpawnerStats): void {
-    itemStack.setLore([
-        apothicStatLore("Min Spawn Delay", spawnerStats.minSpawnDelay),
-        apothicStatLore("Max Spawn Delay", spawnerStats.maxSpawnDelay),
-        apothicStatLore("Spawn Count", spawnerStats.spawnCount),
-        apothicStatLore("Max Entities", spawnerStats.maxCount),
-        apothicStatLore("Required Player Range", spawnerStats.requiredPlayerRange),
-        apothicStatLore("Spawn Range", spawnerStats.spawnRange),
-    ]);
-}
-
-function apothicStatLore(name: string, value: number | string): string {
-    return `§r§a${name}: §7${value}`;
+    itemStack.setLore(SPAWNER_MODIFIERS.map((m) => `§r${formatStatDisplay(m.displayName, spawnerStats[m.statKey])}`));
 }
 
 export const PARTICLES_COMPONENT_ID = "better_spawners:spawner_particles";

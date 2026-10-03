@@ -68,6 +68,8 @@ export function initBetterSpawner(): void {
             },
             onTick: (event) => {
                 const spawnerBlock = event.block;
+                if (!spawnerBlock.isValid || spawnerBlock.typeId !== BETTER_SPAWNER_ITEM_ID) return;
+
                 const spawnerStats = getBetterSpawnerStats(spawnerBlock);
 
                 const center = {
@@ -135,6 +137,7 @@ export function initBetterSpawner(): void {
             spawnerItem.setDynamicProperty(BETTER_SPAWNER_ITEM_STATS_DP, JSON.stringify(spawnerStats));
             setBetterSpawnerLore(spawnerItem, spawnerStats);
             event.block.setPermutation(BlockPermutation.resolve(MinecraftBlockTypes.Air));
+            event.dimension.playSound("dig.stone", event.block.location);
             dropBlockItem(event.dimension, event.block.location, spawnerItem);
         });
     });
