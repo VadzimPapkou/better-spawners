@@ -6,6 +6,7 @@ import {
     removeSpawnerParticles,
     spawnMobs,
     spawnSpawnerParticles,
+    setSpawnerParticlesActive,
     getBetterSpawnerStats,
     setBetterSpawnerStats,
     TICKS_PER_BETTER_SPAWNER_TICK,
@@ -58,12 +59,16 @@ export function initBetterSpawner(): void {
                 beforePlayerPlaceItemStack.set(serializers.block.toString(event.block), heldItem);
             },
             onBreak: (event) => {
-                removeSpawnerParticles(event.dimension, event.block.location);
+                setSpawnerParticlesActive(event.dimension, event.block.location, false);
+                system.runTimeout(() => {
+                    removeSpawnerParticles(event.dimension, event.block.location);
+                }, 40);
+
+                system.runJob
             },
             onTick: (event) => {
                 const spawnerBlock = event.block;
                 const spawnerStats = getBetterSpawnerStats(spawnerBlock);
-                if (!spawnerStats.mobId) return;
 
                 const center = {
                     x: spawnerBlock.location.x + 0.5,
@@ -74,6 +79,9 @@ export function initBetterSpawner(): void {
                     location: center,
                     maxDistance: spawnerStats.requiredPlayerRange,
                 });
+                setSpawnerParticlesActive(spawnerBlock.dimension, spawnerBlock.location, players.length > 0);
+
+                if (!spawnerStats.mobId) return;
                 if (players.length === 0) return;
 
                 const beforeNextSpawnTicks = spawnerStats.beforeNextSpawnTicks

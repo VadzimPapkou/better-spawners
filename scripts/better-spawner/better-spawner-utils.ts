@@ -11,15 +11,7 @@ const MOB_SPAWN_EMITTER = "minecraft:mob_block_spawn_emitter";
 const SPAWNER_SPAWN_FLAME_COUNT = 20;
 const SPAWNER_NW_SMOKE_COUNT = 20;
 
-export function spawnSpawnerParticles(dimension: Dimension, location: Vector3): void {
-    dimension.spawnEntity(PARTICLES_EMITTER_ENTITY_ID, {
-        x: location.x + 0.5,
-        y: location.y + 0.5,
-        z: location.z + 0.5,
-    });
-}
-
-export function removeSpawnerParticles(dimension: Dimension, location: Vector3): void {
+function getSpawnerParticlesEmitter(dimension: Dimension, location: Vector3) {
     const center = {
         x: location.x + 0.5,
         y: location.y + 0.5,
@@ -31,8 +23,28 @@ export function removeSpawnerParticles(dimension: Dimension, location: Vector3):
         maxDistance: 0.75,
         closest: 1,
     })) {
-        entity.remove();
+        return entity;
     }
+    return undefined;
+}
+
+export function spawnSpawnerParticles(dimension: Dimension, location: Vector3): void {
+    dimension.spawnEntity(PARTICLES_EMITTER_ENTITY_ID, {
+        x: location.x + 0.5,
+        y: location.y + 0.5,
+        z: location.z + 0.5,
+    });
+}
+
+/** Drives client animation controller via mark_variant (1 = ambient particles, 0 = idle). */
+export function setSpawnerParticlesActive(dimension: Dimension, location: Vector3, active: boolean): void {
+    const emitter = getSpawnerParticlesEmitter(dimension, location);
+    if (!emitter) return;
+    emitter.triggerEvent(active ? "better_spawners:has_player_in_range" : "better_spawners:no_player_in_range");
+}
+
+export function removeSpawnerParticles(dimension: Dimension, location: Vector3): void {
+    getSpawnerParticlesEmitter(dimension, location)?.remove();
 }
 
 /**
@@ -316,7 +328,14 @@ function apothicStatLore(name: string, value: number | string): string {
 
 export const PARTICLES_COMPONENT_ID = "better_spawners:spawner_particles";
 export const BETTER_SPAWNER_ITEM_ID = "better_spawners:mob_spawner";
-export const TICKS_PER_BETTER_SPAWNER_TICK = 20;
+/*
+Sync with block's
+"minecraft:tick": {
+    "looping": true,
+    "interval_range": [N, N]
+}
+*/
+export const TICKS_PER_BETTER_SPAWNER_TICK = 5;
 export const DEFAULT_MIN_SPAWN_DELAY = 200;
 export const DEFAULT_MAX_SPAWN_DELAY = 800;
 export const DEFAULT_SPAWN_RANGE = 4;

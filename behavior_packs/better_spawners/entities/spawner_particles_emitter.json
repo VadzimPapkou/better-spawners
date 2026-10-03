@@ -15,22 +15,6 @@
                 "width": 0.01,
                 "height": 0.01
             },
-            "minecraft:entity_sensor": {
-                "find_players_only": true,
-                "subsensors": [
-                    {
-                        "range": [14, 14],
-                        "minimum_count": 1,
-                        "event": "better_spawners:has_player_in_range"
-                    },
-                    {
-                        "range": [14, 14],
-                        "minimum_count": 0,
-                        "maximum_count": 0,
-                        "event": "better_spawners:no_player_in_range"
-                    }
-                ]
-            },
             "minecraft:health": {
                 "value": 1,
                 "max": 1
