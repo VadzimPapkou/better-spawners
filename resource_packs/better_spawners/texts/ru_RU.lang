@@ -1,2 +1,3 @@
 item.better_spawners:mob_spawner=Better Spawner
+item.better_spawners:mob_spawner.typed=%s Spawner
 tile.better_spawners:mob_spawner.name=Better Spawner

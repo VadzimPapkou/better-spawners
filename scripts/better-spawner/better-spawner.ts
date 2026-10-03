@@ -6,10 +6,15 @@ import {
     removeSpawnerParticles,
     spawnMobs,
     spawnSpawnerParticles,
-    getBetterSpawnerDp,
-    setBetterSpawnerDp,
+    getBetterSpawnerStats,
+    setBetterSpawnerStats,
     TICKS_PER_BETTER_SPAWNER_TICK,
     BETTER_SPAWNER_ITEM_ID,
+    setBetterSpawnerLore,
+    BETTER_SPAWNER_ITEM_STATS_DP,
+    SPAWNER_BREAK_XP_MAX,
+    SPAWNER_BREAK_XP_MIN,
+    BetterSpawnerStats,
 } from "./better-spawner-utils";
 import { hasSilkTouch } from "../utils/has-silk-touch";
 import { dropBlockItem } from "../utils/drop-block-item";
@@ -17,51 +22,78 @@ import { dropBlockExperience } from "../utils/drop-block-experience";
 import { getMainhandItem } from "../utils/get-mainhand-item";
 import { consumeMainhandItem } from "../utils/consume-mainhand-item";
 import { spawnEggToMobId } from "../utils/spawn-egg-to-mob-id";
+import { mobTypeToName } from "../utils/mob-type-to-name";
+import { log } from "../utils/log";
+import { serializers } from "../utils/serializers";
+import { isObject } from "../utils/is-object";
 
-/** Vanilla monster spawner XP when broken with a pickaxe (no Silk Touch). */
-const SPAWNER_BREAK_XP_MIN = 15;
-const SPAWNER_BREAK_XP_MAX = 43;
+const beforePlayerPlaceItemStack: Map<string, ItemStack> = new Map();
 
 export function initBetterSpawner(): void {
     system.beforeEvents.startup.subscribe(({ blockComponentRegistry }) => {
         blockComponentRegistry.registerCustomComponent(PARTICLES_COMPONENT_ID, {
             onPlace: (event) => {
                 spawnSpawnerParticles(event.dimension, event.block.location);
+                const placeKey = serializers.block.toString(event.block);
+                const itemStack = beforePlayerPlaceItemStack.get(placeKey);
+                beforePlayerPlaceItemStack.delete(placeKey);
+                if (!itemStack) return;
+                const rawBetterSpawnerStats = itemStack.getDynamicProperty(BETTER_SPAWNER_ITEM_STATS_DP);
+                if (!rawBetterSpawnerStats || typeof rawBetterSpawnerStats !== "string") {
+                    log("No better spawner stats found");
+                    return;
+                }
+                const betterSpawnerStats = JSON.parse(rawBetterSpawnerStats) as BetterSpawnerStats;
+                if (!isObject(betterSpawnerStats)) {
+                    log("Better spawner stats JSON is not an object");
+                    return;
+                }
+                setBetterSpawnerStats(event.block, betterSpawnerStats);
+            },
+            beforeOnPlayerPlace: (event) => {
+                const player = event.player;
+                if (!player) return;
+                const heldItem = getMainhandItem(player);
+                if (!heldItem) return;
+                beforePlayerPlaceItemStack.set(serializers.block.toString(event.block), heldItem);
             },
             onBreak: (event) => {
                 removeSpawnerParticles(event.dimension, event.block.location);
             },
             onTick: (event) => {
                 const spawnerBlock = event.block;
+                const spawnerStats = getBetterSpawnerStats(spawnerBlock);
+                if (!spawnerStats.mobId) return;
+
                 const center = {
                     x: spawnerBlock.location.x + 0.5,
                     y: spawnerBlock.location.y + 0.5,
                     z: spawnerBlock.location.z + 0.5,
                 };
-                const players = spawnerBlock.dimension.getPlayers({ location: center, maxDistance: 16 });
+                const players = spawnerBlock.dimension.getPlayers({
+                    location: center,
+                    maxDistance: spawnerStats.requiredPlayerRange,
+                });
                 if (players.length === 0) return;
 
-                const spawnerDp = getBetterSpawnerDp(spawnerBlock);
-                if (!spawnerDp.mobId) return;
-
-                const beforeNextSpawnTicks = spawnerDp.beforeNextSpawnTicks
-                    ? spawnerDp.beforeNextSpawnTicks - TICKS_PER_BETTER_SPAWNER_TICK
+                const beforeNextSpawnTicks = spawnerStats.beforeNextSpawnTicks
+                    ? spawnerStats.beforeNextSpawnTicks - TICKS_PER_BETTER_SPAWNER_TICK
                     : 0;
                 if (beforeNextSpawnTicks <= 0) {
                     spawnMobs(
                         event.block,
-                        spawnerDp.mobId,
-                        spawnerDp.spawnCount,
-                        spawnerDp.maxCount,
-                        spawnerDp.spawnRange
+                        spawnerStats.mobId,
+                        spawnerStats.spawnCount,
+                        spawnerStats.maxCount,
+                        spawnerStats.spawnRange
                     );
-                    setBetterSpawnerDp(
+                    setBetterSpawnerStats(
                         spawnerBlock,
                         "beforeNextSpawnTicks",
-                        randomInteger(spawnerDp.minSpawnDelay, spawnerDp.maxSpawnDelay)
+                        randomInteger(spawnerStats.minSpawnDelay, spawnerStats.maxSpawnDelay)
                     );
                 } else {
-                    setBetterSpawnerDp(spawnerBlock, "beforeNextSpawnTicks", beforeNextSpawnTicks);
+                    setBetterSpawnerStats(spawnerBlock, "beforeNextSpawnTicks", beforeNextSpawnTicks);
                 }
             },
         });
@@ -86,8 +118,16 @@ export function initBetterSpawner(): void {
         event.cancel = true;
 
         system.run(() => {
+            const spawnerStats = getBetterSpawnerStats(event.block);
+            const spawnerItem = new ItemStack(BETTER_SPAWNER_ITEM_ID);
+            const spawnerMobType = spawnerStats.mobId;
+            if (spawnerMobType) {
+                spawnerItem.nameTag = `§r${mobTypeToName(spawnerMobType)} Spawner`;
+            }
+            spawnerItem.setDynamicProperty(BETTER_SPAWNER_ITEM_STATS_DP, JSON.stringify(spawnerStats));
+            setBetterSpawnerLore(spawnerItem, spawnerStats);
             event.block.setPermutation(BlockPermutation.resolve(MinecraftBlockTypes.Air));
-            dropBlockItem(event.dimension, event.block.location, new ItemStack(BETTER_SPAWNER_ITEM_ID));
+            dropBlockItem(event.dimension, event.block.location, spawnerItem);
         });
     });
 
@@ -104,7 +144,7 @@ export function initBetterSpawner(): void {
         system.run(() => {
             if (heldItemId !== getMainhandItem(event.player)?.typeId) return;
             if (event.block.typeId !== BETTER_SPAWNER_ITEM_ID) return;
-            if (!setBetterSpawnerDp(event.block, "mobId", mobId)) return;
+            if (!setBetterSpawnerStats(event.block, "mobId", mobId)) return;
             consumeMainhandItem(event.player, heldItemId);
         });
     });

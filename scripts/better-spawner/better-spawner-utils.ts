@@ -1,4 +1,4 @@
-import { Block, Dimension, Vector3 } from "@minecraft/server";
+import { Block, BlockComponentTypes, Dimension, ItemStack, Vector3 } from "@minecraft/server";
 import { randomInteger } from "../utils/random-integer";
 
 const PARTICLES_EMITTER_ENTITY_ID = "better_spawners:spawner_particles_emitter";
@@ -195,52 +195,61 @@ export function spawnMobs(
     }
 }
 
-export type BetterSpawnerDp = {
+export type BetterSpawnerStats = {
     mobId: string | undefined;
     minSpawnDelay: number;
     maxSpawnDelay: number;
     spawnCount: number;
     maxCount: number;
+    requiredPlayerRange: number;
     spawnRange: number;
     beforeNextSpawnTicks: number;
 };
 
-export type BetterSpawnerDpKey = keyof BetterSpawnerDp;
+export type BetterSpawnerStatsKey = keyof BetterSpawnerStats;
 
 /** Storage ids for block dynamic properties (must match BP). */
-export const BETTER_SPAWNER_DP = {
+export const BETTER_SPAWNER_STATS = {
     mobId: "mob_id",
     minSpawnDelay: "min_spawn_delay",
     maxSpawnDelay: "max_spawn_delay",
     spawnCount: "spawn_count",
     maxCount: "max_count",
+    requiredPlayerRange: "required_player_range",
     spawnRange: "spawn_range",
     beforeNextSpawnTicks: "before_next_spawn_countdown",
-} as const satisfies Record<BetterSpawnerDpKey, string>;
+} as const satisfies Record<BetterSpawnerStatsKey, string>;
 
-export function getBetterSpawnerDp(block: Block): BetterSpawnerDp;
-export function getBetterSpawnerDp<K extends BetterSpawnerDpKey>(block: Block, ...keys: K[]): Pick<BetterSpawnerDp, K>;
-export function getBetterSpawnerDp(block: Block, ...keys: BetterSpawnerDpKey[]) {
-    const blockDp = block.getComponent("minecraft:dynamic_properties");
+export function getBetterSpawnerStats(block: Block): BetterSpawnerStats;
+export function getBetterSpawnerStats<K extends BetterSpawnerStatsKey>(
+    block: Block,
+    ...keys: K[]
+): Pick<BetterSpawnerStats, K>;
+export function getBetterSpawnerStats(block: Block, ...keys: BetterSpawnerStatsKey[]) {
+    const blockDp = block.getComponent(BlockComponentTypes.DynamicProperties);
     if (!blockDp) {
         console.error("No minecraft:dynamic_properties component found");
     }
 
-    const all: BetterSpawnerDp = {
-        minSpawnDelay: readNumberDp(blockDp?.get(BETTER_SPAWNER_DP.minSpawnDelay), DEFAULT_MIN_SPAWN_DELAY),
-        maxSpawnDelay: readNumberDp(blockDp?.get(BETTER_SPAWNER_DP.maxSpawnDelay), DEFAULT_MAX_SPAWN_DELAY),
-        spawnCount: readNumberDp(blockDp?.get(BETTER_SPAWNER_DP.spawnCount), DEFAULT_SPAWN_COUNT),
-        maxCount: readNumberDp(blockDp?.get(BETTER_SPAWNER_DP.maxCount), DEFAULT_MAX_COUNT),
-        spawnRange: readNumberDp(blockDp?.get(BETTER_SPAWNER_DP.spawnRange), DEFAULT_SPAWN_RANGE),
-        beforeNextSpawnTicks: readNumberDp(blockDp?.get(BETTER_SPAWNER_DP.beforeNextSpawnTicks), 0),
-        mobId: readStringDp(blockDp?.get(BETTER_SPAWNER_DP.mobId)),
+    const all: BetterSpawnerStats = {
+        minSpawnDelay: readNumberDp(blockDp?.get(BETTER_SPAWNER_STATS.minSpawnDelay), DEFAULT_MIN_SPAWN_DELAY),
+        maxSpawnDelay: readNumberDp(blockDp?.get(BETTER_SPAWNER_STATS.maxSpawnDelay), DEFAULT_MAX_SPAWN_DELAY),
+        spawnCount: readNumberDp(blockDp?.get(BETTER_SPAWNER_STATS.spawnCount), DEFAULT_SPAWN_COUNT),
+        maxCount: readNumberDp(blockDp?.get(BETTER_SPAWNER_STATS.maxCount), DEFAULT_MAX_COUNT),
+        requiredPlayerRange: readNumberDp(
+            blockDp?.get(BETTER_SPAWNER_STATS.requiredPlayerRange),
+            DEFAULT_REQUIRED_PLAYER_RANGE
+        ),
+        spawnRange: readNumberDp(blockDp?.get(BETTER_SPAWNER_STATS.spawnRange), DEFAULT_SPAWN_RANGE),
+        beforeNextSpawnTicks: readNumberDp(blockDp?.get(BETTER_SPAWNER_STATS.beforeNextSpawnTicks), 0),
+        mobId: readStringDp(blockDp?.get(BETTER_SPAWNER_STATS.mobId)),
     };
 
     if (keys.length === 0) return all;
 
-    const picked = {} as Pick<BetterSpawnerDp, BetterSpawnerDpKey>;
+    const picked = {} as Pick<BetterSpawnerStats, BetterSpawnerStatsKey>;
     for (const key of keys) {
-        (picked as BetterSpawnerDp)[key] = all[key] as never;
+        (picked as BetterSpawnerStats)[key] = all[key] as never;
     }
     return picked;
 }
@@ -254,25 +263,80 @@ function readStringDp(value: unknown): string | undefined {
     return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
-export function setBetterSpawnerDp<K extends BetterSpawnerDpKey>(
+export function setBetterSpawnerStats(block: Block, values: BetterSpawnerStats): boolean;
+export function setBetterSpawnerStats<K extends BetterSpawnerStatsKey>(
     block: Block,
     key: K,
-    value: NonNullable<BetterSpawnerDp[K]>
+    value: NonNullable<BetterSpawnerStats[K]>
+): boolean;
+export function setBetterSpawnerStats<K extends BetterSpawnerStatsKey>(
+    block: Block,
+    keyOrValues: K | BetterSpawnerStats,
+    value?: NonNullable<BetterSpawnerStats[K]>
 ): boolean {
-    const blockDp = block.getComponent("minecraft:dynamic_properties");
+    const blockDp = block.getComponent(BlockComponentTypes.DynamicProperties);
     if (!blockDp) {
         console.error("No minecraft:dynamic_properties component found");
         return false;
     }
-    blockDp.set(BETTER_SPAWNER_DP[key], value);
+
+    if (typeof keyOrValues === "string") {
+        blockDp.set(BETTER_SPAWNER_STATS[keyOrValues], value!);
+        return true;
+    }
+
+    for (const key of Object.keys(BETTER_SPAWNER_STATS) as BetterSpawnerStatsKey[]) {
+        const next = keyOrValues[key];
+        if (next !== undefined) {
+            blockDp.set(BETTER_SPAWNER_STATS[key], next);
+        }
+    }
     return true;
+}
+
+/**
+ * Apothic Spawners item tooltip format (SpawnerStat.createTooltip):
+ * green name + ": " + gray value, e.g. "§r§aMin Spawn Delay: §7200"
+ * Order matches SpawnerStats.REGISTRY for the vanilla stats we store.
+ */
+export function setBetterSpawnerLore(itemStack: ItemStack, spawnerStats: BetterSpawnerStats): void {
+    itemStack.setLore([
+        apothicStatLore("Min Spawn Delay", spawnerStats.minSpawnDelay),
+        apothicStatLore("Max Spawn Delay", spawnerStats.maxSpawnDelay),
+        apothicStatLore("Spawn Count", spawnerStats.spawnCount),
+        apothicStatLore("Max Entities", spawnerStats.maxCount),
+        apothicStatLore("Required Player Range", spawnerStats.requiredPlayerRange),
+        apothicStatLore("Spawn Range", spawnerStats.spawnRange),
+    ]);
+}
+
+function apothicStatLore(name: string, value: number | string): string {
+    return `§r§a${name}: §7${value}`;
 }
 
 export const PARTICLES_COMPONENT_ID = "better_spawners:spawner_particles";
 export const BETTER_SPAWNER_ITEM_ID = "better_spawners:mob_spawner";
 export const TICKS_PER_BETTER_SPAWNER_TICK = 20;
-export const DEFAULT_MIN_SPAWN_DELAY = 1000;
-export const DEFAULT_MAX_SPAWN_DELAY = 1000;
+export const DEFAULT_MIN_SPAWN_DELAY = 200;
+export const DEFAULT_MAX_SPAWN_DELAY = 800;
 export const DEFAULT_SPAWN_RANGE = 4;
 export const DEFAULT_SPAWN_COUNT = 4;
 export const DEFAULT_MAX_COUNT = 6;
+export const DEFAULT_REQUIRED_PLAYER_RANGE = 16;
+export const SPAWNER_BREAK_XP_MIN = 15;
+export const SPAWNER_BREAK_XP_MAX = 43;
+export const BETTER_SPAWNER_ITEM_STATS_DP = "better_spawner:spawner_stats";
+
+/** Vanilla-equivalent defaults written on convert / used as read fallbacks. */
+export function createDefaultBetterSpawnerStats(mobId: string): BetterSpawnerStats {
+    return {
+        mobId,
+        minSpawnDelay: DEFAULT_MIN_SPAWN_DELAY,
+        maxSpawnDelay: DEFAULT_MAX_SPAWN_DELAY,
+        spawnCount: DEFAULT_SPAWN_COUNT,
+        maxCount: DEFAULT_MAX_COUNT,
+        requiredPlayerRange: DEFAULT_REQUIRED_PLAYER_RANGE,
+        spawnRange: DEFAULT_SPAWN_RANGE,
+        beforeNextSpawnTicks: DEFAULT_MIN_SPAWN_DELAY,
+    };
+}

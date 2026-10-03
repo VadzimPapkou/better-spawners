@@ -8,6 +8,9 @@
 **/lib/**
 *.tgz
 
+# local scratch (mod sources, etc.)
+/tmp/
+
 # User-specific files
 *.rsuser
 *.suo
