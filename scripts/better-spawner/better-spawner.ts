@@ -19,7 +19,7 @@ import {
     initOrphanSpawnerParticlesCleanup,
 } from "./better-spawner-utils";
 import { hasSilkTouch } from "../utils/has-silk-touch";
-import { dropBlockItem } from "../utils/drop-block-item";
+import { giveOrDropBlockItem } from "../utils/give-or-drop-block-item";
 import { dropBlockExperience } from "../utils/drop-block-experience";
 import { damageMainhandItem } from "../utils/damage-mainhand-item";
 import { getMainhandItem } from "../utils/get-mainhand-item";
@@ -140,7 +140,7 @@ export function initBetterSpawner(): void {
             setBetterSpawnerLore(spawnerItem, spawnerStats);
             event.block.setPermutation(BlockPermutation.resolve(MinecraftBlockTypes.Air));
             event.dimension.playSound("block.mob_spawner.break", event.block.location);
-            dropBlockItem(event.dimension, event.block.location, spawnerItem);
+            giveOrDropBlockItem(event.player, event.block.location, spawnerItem);
             damageMainhandItem(event.player, 100);
         });
     });

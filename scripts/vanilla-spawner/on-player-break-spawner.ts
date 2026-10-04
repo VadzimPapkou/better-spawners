@@ -1,6 +1,6 @@
 import { world, system, BlockPermutation, GameMode } from "@minecraft/server";
 import { MinecraftBlockTypes } from "@minecraft/vanilla-data";
-import { dropBlockItem } from "../utils/drop-block-item";
+import { giveOrDropBlockItem } from "../utils/give-or-drop-block-item";
 import { hasSilkTouch } from "../utils/has-silk-touch";
 import { damageMainhandItem } from "../utils/damage-mainhand-item";
 
@@ -21,7 +21,7 @@ export function initOnPlayerBreakSpawner(): void {
         system.run(() => {
             block.setPermutation(BlockPermutation.resolve(MinecraftBlockTypes.Air));
             event.dimension.playSound("block.mob_spawner.break", block.location);
-            dropBlockItem(event.dimension, block.location, spawnerItem);
+            giveOrDropBlockItem(player, block.location, spawnerItem);
             damageMainhandItem(player, SPAWNER_SILK_TOUCH_DURABILITY_COST);
         });
     });
