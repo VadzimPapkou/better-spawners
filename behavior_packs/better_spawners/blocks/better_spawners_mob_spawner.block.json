@@ -19,6 +19,9 @@
                     "render_method": "alpha_test"
                 }
             },
+            "minecraft:sound": {
+                "sound": "mob_spawner"
+            },
             "minecraft:block_entity": {
                 "dynamic_properties": true
             },

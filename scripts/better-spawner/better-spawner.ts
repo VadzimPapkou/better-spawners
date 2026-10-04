@@ -111,11 +111,11 @@ export function initBetterSpawner(): void {
     });
 
     world.beforeEvents.playerBreakBlock.subscribe((event) => {
-        if (event.block.typeId !== BETTER_SPAWNER_ITEM_ID) return;
+        if (event.block.typeId !== BETTER_SPAWNER_ITEM_ID || event.player.getGameMode() === GameMode.Creative) return;
 
         const heldItem = getMainhandItem(event.player);
 
-        if (!hasSilkTouch(heldItem) && event.player.getGameMode() !== GameMode.Creative) {
+        if (!hasSilkTouch(heldItem)) {
             if (heldItem?.hasTag("minecraft:is_pickaxe")) {
                 const { dimension } = event;
                 const location = { ...event.block.location };
@@ -138,7 +138,7 @@ export function initBetterSpawner(): void {
             spawnerItem.setDynamicProperty(BETTER_SPAWNER_ITEM_STATS_DP, JSON.stringify(spawnerStats));
             setBetterSpawnerLore(spawnerItem, spawnerStats);
             event.block.setPermutation(BlockPermutation.resolve(MinecraftBlockTypes.Air));
-            event.dimension.playSound("dig.stone", event.block.location);
+            event.dimension.playSound("block.mob_spawner.break", event.block.location);
             dropBlockItem(event.dimension, event.block.location, spawnerItem);
         });
     });
