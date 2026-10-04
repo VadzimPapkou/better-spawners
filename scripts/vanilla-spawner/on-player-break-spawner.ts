@@ -1,35 +1,28 @@
-import { world, ItemStack, Player, GameMode } from "@minecraft/server";
+import { world, system, BlockPermutation, GameMode } from "@minecraft/server";
+import { MinecraftBlockTypes } from "@minecraft/vanilla-data";
 import { dropBlockItem } from "../utils/drop-block-item";
 import { hasSilkTouch } from "../utils/has-silk-touch";
+import { damageMainhandItem } from "../utils/damage-mainhand-item";
 
-const brokenSpawners = new Map<Player, ItemStack>();
+const SPAWNER_SILK_TOUCH_DURABILITY_COST = 100;
 
 export function initOnPlayerBreakSpawner(): void {
     world.beforeEvents.playerBreakBlock.subscribe((event) => {
-        const block = event.block;
+        const { block, player } = event;
         if (block.typeId !== "minecraft:mob_spawner") return;
-        const itemStack = block.getItemStack(1, true)!;
+        if (player.getGameMode() === GameMode.Creative) return;
+        if (!hasSilkTouch(event.itemStack)) return;
 
-        brokenSpawners.set(event.player, itemStack);
-    });
+        const spawnerItem = block.getItemStack(1, true);
+        if (!spawnerItem) return;
 
-    world.afterEvents.playerBreakBlock.subscribe((event) => {
-        const player = event.player;
-        const brokenTypeId = event.brokenBlockPermutation.type.id;
-        const itemStack = brokenSpawners.get(player);
-        brokenSpawners.delete(player);
+        event.cancel = true;
 
-        if (
-            brokenTypeId === "minecraft:mob_spawner" &&
-            hasSilkTouch(event.itemStackBeforeBreak) &&
-            player.getGameMode() !== GameMode.Creative
-        ) {
-            if (!itemStack) {
-                console.error("No broken spawner found for player", player.name);
-                return;
-            }
-
-            dropBlockItem(event.dimension, event.block.location, itemStack);
-        }
+        system.run(() => {
+            block.setPermutation(BlockPermutation.resolve(MinecraftBlockTypes.Air));
+            event.dimension.playSound("block.mob_spawner.break", block.location);
+            dropBlockItem(event.dimension, block.location, spawnerItem);
+            damageMainhandItem(player, SPAWNER_SILK_TOUCH_DURABILITY_COST);
+        });
     });
 }

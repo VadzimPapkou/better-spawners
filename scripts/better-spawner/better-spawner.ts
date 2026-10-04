@@ -21,6 +21,7 @@ import {
 import { hasSilkTouch } from "../utils/has-silk-touch";
 import { dropBlockItem } from "../utils/drop-block-item";
 import { dropBlockExperience } from "../utils/drop-block-experience";
+import { damageMainhandItem } from "../utils/damage-mainhand-item";
 import { getMainhandItem } from "../utils/get-mainhand-item";
 import { consumeMainhandItem } from "../utils/consume-mainhand-item";
 import { spawnEggToMobId } from "../utils/spawn-egg-to-mob-id";
@@ -140,6 +141,7 @@ export function initBetterSpawner(): void {
             event.block.setPermutation(BlockPermutation.resolve(MinecraftBlockTypes.Air));
             event.dimension.playSound("block.mob_spawner.break", event.block.location);
             dropBlockItem(event.dimension, event.block.location, spawnerItem);
+            damageMainhandItem(event.player, 100);
         });
     });
 
