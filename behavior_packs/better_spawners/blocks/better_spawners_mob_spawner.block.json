@@ -19,6 +19,17 @@
                     "render_method": "alpha_test"
                 }
             },
+            "minecraft:item_visual": {
+                "geometry": {
+                    "identifier": "geometry.better_spawners.mob_spawner"
+                },
+                "material_instances": {
+                    "*": {
+                        "texture": "mob_spawner",
+                        "render_method": "alpha_test_single_sided"
+                    }
+                }
+            },
             "minecraft:sound": {
                 "sound": "mob_spawner"
             },
