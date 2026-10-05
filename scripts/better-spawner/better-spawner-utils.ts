@@ -257,6 +257,7 @@ export type BetterSpawnerStats = {
     requiredPlayerRange: number;
     spawnRange: number;
     beforeNextSpawnTicks: number;
+    redstoneControl: boolean;
 };
 
 export type BetterSpawnerStatsKey = keyof BetterSpawnerStats;
@@ -266,9 +267,15 @@ export type NumericModKey = Extract<
     "minSpawnDelay" | "maxSpawnDelay" | "spawnCount" | "maxCount" | "requiredPlayerRange" | "spawnRange"
 >;
 
-export type SpawnerModifier = {
+export type BooleanModKey = Extract<BetterSpawnerStatsKey, "redstoneControl">;
+
+type SpawnerModifierBase = {
     itemId: string;
     displayName: string;
+};
+
+export type SpawnerNumberModifier = SpawnerModifierBase & {
+    kind: "number";
     statKey: NumericModKey;
     delta: number;
     min?: number;
@@ -278,8 +285,16 @@ export type SpawnerModifier = {
     inverseMax?: number;
 };
 
+export type SpawnerBooleanModifier = SpawnerModifierBase & {
+    kind: "boolean";
+    statKey: BooleanModKey;
+};
+
+export type SpawnerModifier = SpawnerNumberModifier | SpawnerBooleanModifier;
+
 export const SPAWNER_MODIFIERS: SpawnerModifier[] = [
     {
+        kind: "number",
         itemId: "minecraft:sugar",
         displayName: "Min Spawn Delay",
         statKey: "minSpawnDelay",
@@ -289,6 +304,7 @@ export const SPAWNER_MODIFIERS: SpawnerModifier[] = [
         inverseMax: 1600,
     },
     {
+        kind: "number",
         itemId: "minecraft:clock",
         displayName: "Max Spawn Delay",
         statKey: "maxSpawnDelay",
@@ -298,6 +314,7 @@ export const SPAWNER_MODIFIERS: SpawnerModifier[] = [
         inverseMax: 1600,
     },
     {
+        kind: "number",
         itemId: "minecraft:fermented_spider_eye",
         displayName: "Spawn Count",
         statKey: "spawnCount",
@@ -307,6 +324,7 @@ export const SPAWNER_MODIFIERS: SpawnerModifier[] = [
         inverseMin: 1,
     },
     {
+        kind: "number",
         itemId: "minecraft:ghast_tear",
         displayName: "Max Entities",
         statKey: "maxCount",
@@ -316,6 +334,7 @@ export const SPAWNER_MODIFIERS: SpawnerModifier[] = [
         inverseMin: 1,
     },
     {
+        kind: "number",
         itemId: "minecraft:prismarine_crystals",
         displayName: "Activation Range",
         statKey: "requiredPlayerRange",
@@ -325,6 +344,7 @@ export const SPAWNER_MODIFIERS: SpawnerModifier[] = [
         inverseMin: 1,
     },
     {
+        kind: "number",
         itemId: "minecraft:piston",
         displayName: "Spawn Range",
         statKey: "spawnRange",
@@ -333,14 +353,25 @@ export const SPAWNER_MODIFIERS: SpawnerModifier[] = [
         inverseDelta: -2,
         inverseMin: 1,
     },
+    {
+        kind: "boolean",
+        itemId: "minecraft:comparator",
+        displayName: "Redstone Control",
+        statKey: "redstoneControl",
+    },
 ];
 
 export const MODIFIER_BY_ITEM = new Map(SPAWNER_MODIFIERS.map((m) => [m.itemId, m]));
 
 /** Apothic-style "§aName: §7value" (lore prefixes with §r). */
-export function formatStatDisplay(name: string, value: number | string): string {
-    return `§a${name}: §7${value}`;
+/** Numeric/string stats: Apothic `§aName: §7value`. Booleans use On/Off (lang misc.on/off). */
+export function formatStatDisplay(name: string, value: number | string | boolean): string {
+    const display = typeof value === "boolean" ? (value ? "On" : "Off") : value;
+    return `§a${name}: §7${display}`;
 }
+
+/** Transient redstone signal level (not part of silk-touch stats). */
+export const REDSTONE_POWER_DP = "better_spawners:redstone_power";
 
 /** Storage ids for block dynamic properties (must match BP). */
 export const BETTER_SPAWNER_STATS = {
@@ -352,6 +383,7 @@ export const BETTER_SPAWNER_STATS = {
     requiredPlayerRange: "required_player_range",
     spawnRange: "spawn_range",
     beforeNextSpawnTicks: "before_next_spawn_countdown",
+    redstoneControl: "redstone_control",
 } as const satisfies Record<BetterSpawnerStatsKey, string>;
 
 export function getBetterSpawnerStats(block: Block): BetterSpawnerStats;
@@ -377,6 +409,7 @@ export function getBetterSpawnerStats(block: Block, ...keys: BetterSpawnerStatsK
         spawnRange: readNumberDp(blockDp?.get(BETTER_SPAWNER_STATS.spawnRange), DEFAULT_SPAWN_RANGE),
         beforeNextSpawnTicks: readNumberDp(blockDp?.get(BETTER_SPAWNER_STATS.beforeNextSpawnTicks), 0),
         mobId: readStringDp(blockDp?.get(BETTER_SPAWNER_STATS.mobId)),
+        redstoneControl: readBooleanDp(blockDp?.get(BETTER_SPAWNER_STATS.redstoneControl), false),
     };
 
     if (keys.length === 0) return all;
@@ -395,6 +428,25 @@ function readNumberDp(value: unknown, fallback: number): number {
 
 function readStringDp(value: unknown): string | undefined {
     return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+function readBooleanDp(value: unknown, fallback: boolean): boolean {
+    return typeof value === "boolean" ? value : fallback;
+}
+
+export function getRedstonePower(block: Block): number {
+    const blockDp = block.getComponent(BlockComponentTypes.DynamicProperties);
+    return readNumberDp(blockDp?.get(REDSTONE_POWER_DP), 0);
+}
+
+export function setRedstonePower(block: Block, power: number): boolean {
+    const blockDp = block.getComponent(BlockComponentTypes.DynamicProperties);
+    if (!blockDp) {
+        console.error("No minecraft:dynamic_properties component found");
+        return false;
+    }
+    blockDp.set(REDSTONE_POWER_DP, power);
+    return true;
 }
 
 export function setBetterSpawnerStats(block: Block, values: BetterSpawnerStats): boolean;
@@ -429,7 +481,16 @@ export function setBetterSpawnerStats<K extends BetterSpawnerStatsKey>(
 }
 
 export function setBetterSpawnerLore(itemStack: ItemStack, spawnerStats: BetterSpawnerStats): void {
-    itemStack.setLore(SPAWNER_MODIFIERS.map((m) => `§r${formatStatDisplay(m.displayName, spawnerStats[m.statKey])}`));
+    // Apothic BooleanStat: omit at default (false); when true show dark-green name only (no ": value").
+    itemStack.setLore(
+        SPAWNER_MODIFIERS.flatMap((m) => {
+            const raw = spawnerStats[m.statKey];
+            if (typeof raw === "boolean") {
+                return raw ? [`§r§2${m.displayName}`] : [];
+            }
+            return [`§r${formatStatDisplay(m.displayName, raw)}`];
+        })
+    );
 }
 
 export const PARTICLES_COMPONENT_ID = "better_spawners:spawner_particles";
@@ -463,5 +524,6 @@ export function createDefaultBetterSpawnerStats(mobId: string): BetterSpawnerSta
         requiredPlayerRange: DEFAULT_REQUIRED_PLAYER_RANGE,
         spawnRange: DEFAULT_SPAWN_RANGE,
         beforeNextSpawnTicks: DEFAULT_MIN_SPAWN_DELAY,
+        redstoneControl: false,
     };
 }

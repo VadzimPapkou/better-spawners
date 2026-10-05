@@ -5,6 +5,7 @@ import {
     getBetterSpawnerStats,
     MODIFIER_BY_ITEM,
     setBetterSpawnerStats,
+    SpawnerNumberModifier,
 } from "./better-spawner-utils";
 import { consumeMainhandItem } from "../utils/consume-mainhand-item";
 import { getMainhandItem } from "../utils/get-mainhand-item";
@@ -14,6 +15,12 @@ function clampStat(value: number, min?: number, max?: number): number {
     if (min !== undefined) next = Math.max(next, min);
     if (max !== undefined) next = Math.min(next, max);
     return next;
+}
+
+function applyNumberModifier(modifier: SpawnerNumberModifier, oldValue: number, inverse: boolean): number {
+    return inverse
+        ? clampStat(oldValue + modifier.inverseDelta, modifier.inverseMin, modifier.inverseMax)
+        : clampStat(oldValue + modifier.delta, modifier.min, modifier.max);
 }
 
 export function initBetterSpawnerModifications(): void {
@@ -38,10 +45,25 @@ export function initBetterSpawnerModifications(): void {
             if (getMainhandItem(player)?.typeId !== itemId) return;
 
             const stats = getBetterSpawnerStats(block);
+
+            if (modifier.kind === "number") {
+                const oldValue = stats[modifier.statKey];
+                const nextValue = applyNumberModifier(modifier, oldValue, inverse);
+
+                if (nextValue === oldValue) {
+                    player.onScreenDisplay.setActionBar(`${formatStatDisplay(modifier.displayName, oldValue)} (cap)`);
+                    return;
+                }
+                if (!setBetterSpawnerStats(block, modifier.statKey, nextValue)) return;
+                if (!consumeMainhandItem(player, itemId)) return;
+
+                player.onScreenDisplay.setActionBar(formatStatDisplay(modifier.displayName, nextValue));
+                return;
+            }
+
+            // Apply → enable, sneak → disable (mirrors numeric add/remove).
             const oldValue = stats[modifier.statKey];
-            const nextValue = inverse
-                ? clampStat(oldValue + modifier.inverseDelta, modifier.inverseMin, modifier.inverseMax)
-                : clampStat(oldValue + modifier.delta, modifier.min, modifier.max);
+            const nextValue = !inverse;
 
             if (nextValue === oldValue) {
                 player.onScreenDisplay.setActionBar(`${formatStatDisplay(modifier.displayName, oldValue)} (cap)`);

@@ -9,6 +9,8 @@ import {
     setSpawnerParticlesActive,
     getBetterSpawnerStats,
     setBetterSpawnerStats,
+    getRedstonePower,
+    setRedstonePower,
     TICKS_PER_BETTER_SPAWNER_TICK,
     BETTER_SPAWNER_ITEM_ID,
     setBetterSpawnerLore,
@@ -68,11 +70,16 @@ export function initBetterSpawner(): void {
                     removeSpawnerParticles(event.dimension, event.block.location);
                 }, 40);
             },
+            onRedstoneUpdate(event) {
+                // Always cache power so enabling control later sees the current signal.
+                setRedstonePower(event.block, event.powerLevel);
+            },
             onTick: (event) => {
                 const spawnerBlock = event.block;
                 if (!spawnerBlock.isValid || spawnerBlock.typeId !== BETTER_SPAWNER_ITEM_ID) return;
 
                 const spawnerStats = getBetterSpawnerStats(spawnerBlock);
+                const redstonePower = getRedstonePower(spawnerBlock);
 
                 const center = {
                     x: spawnerBlock.location.x + 0.5,
@@ -83,10 +90,11 @@ export function initBetterSpawner(): void {
                     location: center,
                     maxDistance: spawnerStats.requiredPlayerRange,
                 });
-                setSpawnerParticlesActive(spawnerBlock.dimension, spawnerBlock.location, players.length > 0);
+                const isSpawnerActive = players.length > 0 && (!spawnerStats.redstoneControl || redstonePower > 0);
+                setSpawnerParticlesActive(spawnerBlock.dimension, spawnerBlock.location, isSpawnerActive);
 
                 if (!spawnerStats.mobId) return;
-                if (players.length === 0) return;
+                if (!isSpawnerActive) return;
 
                 const beforeNextSpawnTicks = spawnerStats.beforeNextSpawnTicks
                     ? spawnerStats.beforeNextSpawnTicks - TICKS_PER_BETTER_SPAWNER_TICK
