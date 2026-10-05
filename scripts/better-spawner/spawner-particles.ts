@@ -2,9 +2,6 @@ import { Block, Dimension, DimensionTypes, system, Vector3, world } from "@minec
 import { BETTER_SPAWNER_ITEM_ID } from "./spawner-constants";
 
 const PARTICLES_EMITTER_ENTITY_ID = "better_spawners:spawner_particles_emitter";
-/** Diamond-blue glitter burst on vanilla → better spawner conversion. */
-const CONVERSION_PARTICLE = "better_spawners:spawner_conversion_sparkle";
-const CONVERSION_SOUND = "firework.twinkle";
 /** 30s between orphan particle sweeps. */
 const ORPHAN_PARTICLES_CLEANUP_INTERVAL_TICKS = 600;
 /** Match onBreak grace so ambient FX can finish fading. */
@@ -33,17 +30,6 @@ export function spawnSpawnerParticles(dimension: Dimension, location: Vector3): 
         y: location.y + 0.5,
         z: location.z + 0.5,
     });
-}
-
-/** Diamond-blue glitter burst when a vanilla spawner is converted. */
-export function playSpawnerConversionParticles(dimension: Dimension, location: Vector3): void {
-    const center = {
-        x: location.x + 0.5,
-        y: location.y + 0.5,
-        z: location.z + 0.5,
-    };
-    dimension.spawnParticle(CONVERSION_PARTICLE, center);
-    dimension.playSound(CONVERSION_SOUND, center);
 }
 
 /** Drives client animation controller via mark_variant (1 = ambient particles, 0 = idle). */

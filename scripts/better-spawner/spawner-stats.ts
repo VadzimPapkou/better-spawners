@@ -140,8 +140,8 @@ export function setBetterSpawnerStats<K extends BetterSpawnerStatsKey>(
     return true;
 }
 
-/** Vanilla-equivalent defaults written on convert / used as read fallbacks. */
-export function createDefaultBetterSpawnerStats(mobId: string): BetterSpawnerStats {
+/** Vanilla-equivalent defaults for a freshly obtained better spawner. */
+export function createDefaultBetterSpawnerStats(mobId?: string): BetterSpawnerStats {
     return {
         mobId,
         minSpawnDelay: DEFAULT_MIN_SPAWN_DELAY,

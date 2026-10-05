@@ -1,5 +1,11 @@
-import { world, Entity, EntityInitializationCause, Block, BlockVolume } from "@minecraft/server";
+import { world, Entity, EntityComponentTypes, EntityInitializationCause, Block, BlockVolume } from "@minecraft/server";
 import { inferredSpawnerTypes } from "./inferred-spawner-types";
+
+/** Living mobs only — skips xp_orb, item, projectiles, etc. */
+function isInferableSpawnerMob(entity: Entity): boolean {
+    if (!entity.isValid || entity.typeId === "minecraft:player") return false;
+    return entity.getComponent(EntityComponentTypes.TypeFamily)?.hasTypeFamily("mob") === true;
+}
 
 function findNearbySpawners(entity: Entity): Block[] {
     if (!entity.isValid) return [];
@@ -21,18 +27,14 @@ function findNearbySpawners(entity: Entity): Block[] {
 export function initOnSpawnerSpawnEntity(): void {
     world.afterEvents.entitySpawn.subscribe((event) => {
         const entity = event.entity;
-        // log("[dbg-spawner-spawn] entitySpawn", entity.typeId, "cause:", event.cause);
-        if (event.cause !== EntityInitializationCause.Spawned) {
-            // log("[dbg-spawner-spawn] skip: cause not Spawned");
-            return;
-        }
+        if (event.cause !== EntityInitializationCause.Spawned) return;
+        if (!isInferableSpawnerMob(entity)) return;
+
         const spawners = findNearbySpawners(entity);
-        if (spawners.length === 0) {
-            return;
-        }
+        if (spawners.length === 0) return;
+
         for (const spawner of spawners) {
             inferredSpawnerTypes.set(spawner, entity.typeId);
-            // log("[dbg-spawner-spawn] set type", entity.typeId, "at", spawner.location);
         }
     });
 }
