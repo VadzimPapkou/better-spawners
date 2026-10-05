@@ -1,11 +1,8 @@
 import { system, world } from "@minecraft/server";
 import { MinecraftItemTypes } from "@minecraft/vanilla-data";
 import { inferredSpawnerTypes } from "./inferred-spawner-types";
-import {
-    BETTER_SPAWNER_ITEM_ID,
-    createDefaultBetterSpawnerStats,
-    setBetterSpawnerStats,
-} from "../better-spawner/better-spawner-utils";
+import { BETTER_SPAWNER_ITEM_ID } from "../better-spawner/spawner-constants";
+import { createDefaultBetterSpawnerStats, setBetterSpawnerStats } from "../better-spawner/spawner-stats";
 import { consumeMainhandItem } from "../utils/consume-mainhand-item";
 
 export function initOnPlayerInteractWithSpawner(): void {

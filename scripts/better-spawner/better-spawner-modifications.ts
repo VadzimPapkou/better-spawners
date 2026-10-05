@@ -1,12 +1,7 @@
 import { system, world } from "@minecraft/server";
-import {
-    BETTER_SPAWNER_ITEM_ID,
-    formatStatDisplay,
-    getBetterSpawnerStats,
-    MODIFIER_BY_ITEM,
-    setBetterSpawnerStats,
-    SpawnerNumberModifier,
-} from "./better-spawner-utils";
+import { BETTER_SPAWNER_ITEM_ID } from "./spawner-constants";
+import { formatStatDisplay, MODIFIER_BY_ITEM, SpawnerNumberModifier } from "./spawner-modifiers";
+import { getBetterSpawnerStats, setBetterSpawnerStats } from "./spawner-stats";
 import { consumeMainhandItem } from "../utils/consume-mainhand-item";
 import { getMainhandItem } from "../utils/get-mainhand-item";
 

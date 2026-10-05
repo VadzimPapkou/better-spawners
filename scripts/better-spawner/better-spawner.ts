@@ -2,24 +2,28 @@ import { BlockPermutation, GameMode, ItemStack, system, world } from "@minecraft
 import { MinecraftBlockTypes } from "@minecraft/vanilla-data";
 import { randomInteger } from "../utils/random-integer";
 import {
-    PARTICLES_COMPONENT_ID,
-    removeSpawnerParticles,
-    spawnMobs,
-    spawnSpawnerParticles,
-    setSpawnerParticlesActive,
-    getBetterSpawnerStats,
-    setBetterSpawnerStats,
-    getRedstonePower,
-    setRedstonePower,
-    TICKS_PER_BETTER_SPAWNER_TICK,
     BETTER_SPAWNER_ITEM_ID,
-    setBetterSpawnerLore,
     BETTER_SPAWNER_ITEM_STATS_DP,
+    PARTICLES_COMPONENT_ID,
     SPAWNER_BREAK_XP_MAX,
     SPAWNER_BREAK_XP_MIN,
-    BetterSpawnerStats,
+    TICKS_PER_BETTER_SPAWNER_TICK,
+} from "./spawner-constants";
+import { setBetterSpawnerLore } from "./spawner-modifiers";
+import {
     initOrphanSpawnerParticlesCleanup,
-} from "./better-spawner-utils";
+    removeSpawnerParticles,
+    setSpawnerParticlesActive,
+    spawnSpawnerParticles,
+} from "./spawner-particles";
+import { spawnMobs } from "./spawner-spawn";
+import {
+    BetterSpawnerStats,
+    getBetterSpawnerStats,
+    getRedstonePower,
+    setBetterSpawnerStats,
+    setRedstonePower,
+} from "./spawner-stats";
 import { hasSilkTouch } from "../utils/has-silk-touch";
 import { giveOrDropBlockItem } from "../utils/give-or-drop-block-item";
 import { dropBlockExperience } from "../utils/drop-block-experience";
