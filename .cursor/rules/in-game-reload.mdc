@@ -7,7 +7,7 @@ alwaysApply: true
 
 After pack/script/content edits that need a world refresh: finish all edits first, wait for watch if needed (`build-watch.mdc`), then reload **once at the end of your turn** — not after every file, not mid-work.
 
-1. If the world is connected via Bedrock MCP (`user-minecraft-bedrock`): run `/reload all` (`execute_command`), then `send_message` a short status (e.g. `reload done` / `релоад сделан`). Mention reload briefly in the reply to the user. Do not wait for the user to ask.
+1. If the world is connected via Bedrock MCP (`user-minecraft-bedrock`): run `/reload all` (`execute_command`), then `send_message` a short status (e.g. `reload done`). Mention reload briefly in the reply to the user. Do not wait for the user to ask.
 2. If MCP/world is **not** connected (`needsAuth`, unavailable, or clearly offline): ask the user to connect and always paste the command so they can copy it:
     ```
     /connect localhost:8001/ws

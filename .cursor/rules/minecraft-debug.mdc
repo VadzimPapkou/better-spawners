@@ -5,15 +5,15 @@ alwaysApply: true
 
 # Minecraft script debug
 
-Дебаг скриптов — через `scripts/utils/log.ts` (`log(...)`), не через произвольный `console.log` в новых местах и **не** через `fetch`/HTTP ingest (в Script API это не работает как дебаг-канал).
+Debug scripts via `scripts/utils/log.ts` (`log(...)`), not via ad-hoc `console.log` in new places and **not** via `fetch`/HTTP ingest (that does not work as a debug channel in Script API).
 
-`log` = `console.warn` → в ContentLog строка вида:
+`log` = `console.warn` → ContentLog line like:
 
 ```
 12:40:01[Scripting][warning]-your message here
 ```
 
-## Папка логов
+## Logs folder
 
 ```
 %APPDATA%\Minecraft Bedrock\logs\
@@ -21,16 +21,16 @@ alwaysApply: true
 
 (= `C:\Users\<user>\AppData\Roaming\Minecraft Bedrock\logs\`)
 
-Бери самый свежий `ContentLogYYYY-MM-DD_HH-MM-SS_*.txt` (по `LastWriteTime`).
+Take the newest `ContentLogYYYY-MM-DD_HH-MM-SS_*.txt` (by `LastWriteTime`).
 
-Файл часто **залочен** процессом Minecraft: обычный `ReadAllBytes` / иногда `Select-String` падают или отдают устаревшее. Читай через shared-read copy (`File.Open(..., Read, ReadWrite)` → temp), потом grep по копии. Это снимок на момент копирования, не live-stream — после репро перечитай снова.
+The file is often **locked** by the Minecraft process: plain `ReadAllBytes` / sometimes `Select-String` fail or return stale data. Read via shared-read copy (`File.Open(..., Read, ReadWrite)` → temp), then grep the copy. That is a snapshot at copy time, not a live stream — after repro, copy again.
 
-**Не бери сырой `Tail` файла** — хвост забит `[Sound][verbose]` (fly и т.п.), на экране в игре их нет. Для script debug фильтруй `[Scripting][warning]` (то что даёт `log()` / то же что content log overlay в игре).
+**Do not raw-`Tail` the file** — the tail is flooded with `[Sound][verbose]` (fly etc.), which are not shown on the in-game overlay. For script debug, filter `[Scripting][warning]` (what `log()` produces / same as the content log overlay in-game).
 
-## Как дебажить
+## How to debug
 
-1. Вставь `log("[tag] ...", values)` вокруг гипотез (ранние return, setType, consume item).
-2. Дождись watch (`build-watch.mdc`), сделай `/reload all` (`in-game-reload.mdc`).
-3. Воспроизведи баг в мире.
-4. Скопируй свежий ContentLog shared-read'ом, возьми последние строки с `[Scripting][warning]` / тегом `[dbg-…]`.
-5. По логам подтверди/опровергни гипотезы, потом фикси.
+1. Insert `log("[tag] ...", values)` around hypotheses (early returns, setType, consume item).
+2. Wait for watch (`build-watch.mdc`), then `/reload all` (`in-game-reload.mdc`).
+3. Reproduce the bug in-world.
+4. Copy the fresh ContentLog via shared-read, take the latest `[Scripting][warning]` / `[dbg-…]` lines.
+5. Confirm/refute hypotheses from the logs, then fix.

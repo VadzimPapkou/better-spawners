@@ -5,11 +5,11 @@ alwaysApply: true
 
 # Build watch
 
-После правок в `scripts/` смотри терминал с `npm run local-deploy -- --watch`.
+After edits under `scripts/`, check the terminal running `npm run local-deploy -- --watch`.
 
-Как узнать что это он: в метаданных `active_command: npm run local-deploy -- --watch`, в выводе циклы `watch-task` → `typescript` → `bundle` → `package` → `Waiting for new changes...`.
+How to recognize it: metadata has `active_command: npm run local-deploy -- --watch`, output cycles `watch-task` → `typescript` → `bundle` → `package` → `Waiting for new changes...`.
 
-**Ок:**
+**OK:**
 
 ```
 [12:31:03] ■ finished 'typescript' in 0.51s
@@ -18,6 +18,6 @@ alwaysApply: true
 [12:31:03] ■ Waiting for new changes...
 ```
 
-**Ошибка:** строки `error TS…`, затем `x finished 'typescript' … with errors` / `x finished 'build' … with errors`. Исправь и перечитай терминал, пока снова не будет `■ finished` + `Waiting for new changes...`.
+**Error:** lines `error TS…`, then `x finished 'typescript' … with errors` / `x finished 'build' … with errors`. Fix and re-read the terminal until you see `■ finished` + `Waiting for new changes...` again.
 
-Если такого терминала нет (нет `active_command` с `local-deploy`) — напиши в чат запустить `npm run local-deploy -- --watch`. Не запускай билд сам.
+If there is no such terminal (no `active_command` with `local-deploy`) — tell the user in chat to run `npm run local-deploy -- --watch`. Do not start the build yourself.

@@ -1,11 +1,11 @@
 # Todo
 
-- [x] сделать передачу block dp better spawner при ломании в ItemStack, при постановке из ItemStack в Block dp
-- [x] сделать рабочими яйца призыва мобов клик по better spawner -> смена типа
-- [x] синхронизировать стейт работы/не работы блока спавнера с партиклами, сделать чтобы парктилы не исчезали мгновенно при ломании спавнера
-- [x] исправить маппинг mob egg -> entity type -> spawner type, для некоторых мобов надо override например evoker
-- [x] добавить периодическую чистку orphan spawner particle entities
-- [ ] сделать кручение моба в спавнере (render controller -> выбор нужного geo моба ванили)
-- [x] сделать возможность улучшать, настраивать после улучшения спавнеры(custom json ui server form)
-- [ ] добавить улучшение компаратор для работы спавнера по редстоун сигналу
-- [ ] придумать способ получения яиц призыва мобов(возможно, Capturing энчант, тогда придумать как его получать, возможно хук на ванильный чар), либо кастомный красивый предмет типа Косы Жнеца
+- [x] persist better spawner block DP on break into ItemStack, and from ItemStack into Block DP on place
+- [x] make spawn eggs work: click better spawner -> change type
+- [x] sync spawner active/inactive block state with particles; keep particles from vanishing instantly when the spawner is broken
+- [x] fix mob egg -> entity type -> spawner type mapping; some mobs need overrides (e.g. evoker)
+- [x] add periodic cleanup of orphan spawner particle entities
+- [ ] spin the mob inside the spawner (render controller -> pick the right vanilla mob geo)
+- [x] allow upgrading / configuring upgraded spawners (custom JSON UI server form)
+- [ ] add comparator upgrade so the spawner responds to redstone signal
+- [ ] invent a way to obtain spawn eggs (maybe Capturing enchant — then how to obtain it, maybe hook vanilla enchant), or a custom nice item like a Reaper's Scythe

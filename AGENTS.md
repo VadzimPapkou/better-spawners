@@ -1,32 +1,32 @@
-# Цель проекта
+# Project goal
 
-Воссоздать логику [Apothic Spawners](https://www.curseforge.com/minecraft/mc-mods/apothic-spawners) на Minecraft Bedrock.
+Recreate [Apothic Spawners](https://www.curseforge.com/minecraft/mc-mods/apothic-spawners) logic on Minecraft Bedrock.
 
-Кастомный спавнер делать как можно ближе к ванильному: поведение, визуал, интеракции — сначала ванильный паритет, потом апгрейды/фичи Apothic поверх него.
+Keep the custom spawner as close to vanilla as possible: behavior, visuals, interactions — vanilla parity first, then Apothic upgrades/features on top.
 
 # Agent checklist
 
-После правок pack/script/content (BP/RP/JSON/TS):
+After pack/script/content edits (BP/RP/JSON/TS):
 
-1. Если крутится `npm run local-deploy -- --watch` — дождись `Waiting for new changes...` (см. `.cursor/rules/build-watch.mdc`). Не запускай билд сам.
-2. Релоад — **1 раз в конце** своего ответа (когда правки готовы), не после каждого файла. В мире через Bedrock MCP: `/reload all` + `send_message` (`релоад сделан`). Не ждать пока попросят. Правило: `.cursor/rules/in-game-reload.mdc`.
-3. Если MCP/мир не подключен — кинуть в чат:
+1. If `npm run local-deploy -- --watch` is running — wait for `Waiting for new changes...` (see `.cursor/rules/build-watch.mdc`). Do not start the build yourself.
+2. Reload — **once at the end** of your reply (when edits are ready), not after every file. In-world via Bedrock MCP: `/reload all` + `send_message` (`reload done`). Do not wait to be asked. Rule: `.cursor/rules/in-game-reload.mdc`.
+3. If MCP/world is not connected — paste into chat:
     ```
     /connect localhost:8001/ws
     ```
-    Не писать фейковый «reload done».
+    Do not send a fake «reload done».
 
 # Minecraft script debug
 
-Дебаг скриптов — через `scripts/utils/log.ts` (`log(...)`), **не** через `fetch`/HTTP ingest и не через произвольный `console.log` в новых местах.
+Debug scripts via `scripts/utils/log.ts` (`log(...)`), **not** via `fetch`/HTTP ingest and not via ad-hoc `console.log` in new places.
 
-`log` = `console.warn` → в ContentLog строка вида:
+`log` = `console.warn` → ContentLog line like:
 
 ```
 12:40:01[Scripting][warning]-your message here
 ```
 
-## Папка логов
+## Logs folder
 
 ```
 %APPDATA%\Minecraft Bedrock\logs\
@@ -34,18 +34,18 @@
 
 (= `C:\Users\<user>\AppData\Roaming\Minecraft Bedrock\logs\`)
 
-Бери самый свежий `ContentLogYYYY-MM-DD_HH-MM-SS_*.txt` (по `LastWriteTime`).
+Take the newest `ContentLogYYYY-MM-DD_HH-MM-SS_*.txt` (by `LastWriteTime`).
 
-Файл часто **залочен** процессом Minecraft: обычный `ReadAllBytes` / иногда `Select-String` падают или отдают устаревшее. Читай через shared-read copy (`File.Open(..., Read, ReadWrite)` → temp), потом grep по копии. Это снимок на момент копирования, не live-stream — после репро перечитай снова.
+The file is often **locked** by the Minecraft process: plain `ReadAllBytes` / sometimes `Select-String` fail or return stale data. Read via shared-read copy (`File.Open(..., Read, ReadWrite)` → temp), then grep the copy. That is a snapshot at copy time, not a live stream — after repro, copy again.
 
-**Не бери сырой `Tail` файла** — хвост забит `[Sound][verbose]` (fly и т.п.), на экране в игре их нет. Для script debug фильтруй `[Scripting][warning]` (то что даёт `log()` / то же что content log overlay в игре).
+**Do not raw-`Tail` the file** — the tail is flooded with `[Sound][verbose]` (fly etc.), which are not shown on the in-game overlay. For script debug, filter `[Scripting][warning]` (what `log()` produces / same as the content log overlay in-game).
 
-## Как дебажить
+## How to debug
 
-1. Вставь `log("[tag] ...", values)` вокруг гипотез (ранние return, setType, consume item).
-2. Дождись watch (`build-watch.mdc`), сделай `/reload all` (`in-game-reload.mdc`).
-3. Воспроизведи баг в мире.
-4. Скопируй свежий ContentLog shared-read'ом, возьми последние строки с `[Scripting][warning]` / тегом `[dbg-…]`.
-5. По логам подтверди/опровергни гипотезы, потом фикси.
+1. Insert `log("[tag] ...", values)` around hypotheses (early returns, setType, consume item).
+2. Wait for watch (`build-watch.mdc`), then `/reload all` (`in-game-reload.mdc`).
+3. Reproduce the bug in-world.
+4. Copy the fresh ContentLog via shared-read, take the latest `[Scripting][warning]` / `[dbg-…]` lines.
+5. Confirm/refute hypotheses from the logs, then fix.
 
-Дубликат правила: `.cursor/rules/minecraft-debug.mdc`.
+Rule duplicate: `.cursor/rules/minecraft-debug.mdc`.
