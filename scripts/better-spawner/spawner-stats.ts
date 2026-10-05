@@ -19,6 +19,7 @@ export type BetterSpawnerStats = {
     spawnRange: number;
     beforeNextSpawnTicks: number;
     redstoneControl: boolean;
+    ignoresLight: boolean;
 };
 
 export type BetterSpawnerStatsKey = keyof BetterSpawnerStats;
@@ -28,7 +29,7 @@ export type NumericModKey = Extract<
     "minSpawnDelay" | "maxSpawnDelay" | "spawnCount" | "maxCount" | "requiredPlayerRange" | "spawnRange"
 >;
 
-export type BooleanModKey = Extract<BetterSpawnerStatsKey, "redstoneControl">;
+export type BooleanModKey = Extract<BetterSpawnerStatsKey, "redstoneControl" | "ignoresLight">;
 
 /** Storage ids for block dynamic properties (must match BP). */
 export const BETTER_SPAWNER_STATS = {
@@ -41,6 +42,7 @@ export const BETTER_SPAWNER_STATS = {
     spawnRange: "spawn_range",
     beforeNextSpawnTicks: "before_next_spawn_countdown",
     redstoneControl: "redstone_control",
+    ignoresLight: "ignores_light",
 } as const satisfies Record<BetterSpawnerStatsKey, string>;
 
 export function getBetterSpawnerStats(block: Block): BetterSpawnerStats;
@@ -67,6 +69,7 @@ export function getBetterSpawnerStats(block: Block, ...keys: BetterSpawnerStatsK
         beforeNextSpawnTicks: readNumberDp(blockDp?.get(BETTER_SPAWNER_STATS.beforeNextSpawnTicks), 0),
         mobId: readStringDp(blockDp?.get(BETTER_SPAWNER_STATS.mobId)),
         redstoneControl: readBooleanDp(blockDp?.get(BETTER_SPAWNER_STATS.redstoneControl), false),
+        ignoresLight: readBooleanDp(blockDp?.get(BETTER_SPAWNER_STATS.ignoresLight), false),
     };
 
     if (keys.length === 0) return all;
@@ -149,5 +152,6 @@ export function createDefaultBetterSpawnerStats(mobId: string): BetterSpawnerSta
         spawnRange: DEFAULT_SPAWN_RANGE,
         beforeNextSpawnTicks: DEFAULT_MIN_SPAWN_DELAY,
         redstoneControl: false,
+        ignoresLight: false,
     };
 }

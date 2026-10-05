@@ -140,7 +140,8 @@ export function spawnMobs(
     mobId: string,
     spawnCount: number,
     maxCount: number,
-    spawnRange: number
+    spawnRange: number,
+    ignoresLight = false
 ): void {
     const { dimension, location } = spawnerBlock;
     const nearbyCount = countNearbySameType(dimension, location, mobId, spawnRange);
@@ -156,7 +157,7 @@ export function spawnMobs(
         const feet = dimension.getBlock(pos);
         const head = dimension.getBlock({ ...pos, y: pos.y + 1 });
         if (!feet?.isAir || !head?.isAir) continue;
-        if (!passesLightCheck(mobId, feet.getLightLevel())) continue;
+        if (!ignoresLight && !passesLightCheck(mobId, feet.getLightLevel())) continue;
 
         const mobLocation = {
             x: pos.x + 0.5,

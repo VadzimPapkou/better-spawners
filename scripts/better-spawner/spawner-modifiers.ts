@@ -91,6 +91,12 @@ export const SPAWNER_MODIFIERS: SpawnerModifier[] = [
         displayName: "Redstone Control",
         statKey: "redstoneControl",
     },
+    {
+        kind: "boolean",
+        itemId: "minecraft:soul_lantern",
+        displayName: "Ignores Light",
+        statKey: "ignoresLight",
+    },
 ];
 
 export const MODIFIER_BY_ITEM = new Map(SPAWNER_MODIFIERS.map((m) => [m.itemId, m]));
