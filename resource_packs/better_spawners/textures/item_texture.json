@@ -1,0 +1,9 @@
+{
+    "resource_pack_name": "better_spawners",
+    "texture_name": "atlas.items",
+    "texture_data": {
+        "better_spawners:guide_book": {
+            "textures": "textures/items/guide_book"
+        }
+    }
+}

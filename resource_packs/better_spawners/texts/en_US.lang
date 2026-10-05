@@ -1,3 +1,12 @@
 item.better_spawners:mob_spawner=Better Spawner
 item.better_spawners:mob_spawner.typed=%s Spawner
 tile.better_spawners:mob_spawner.name=Better Spawner
+item.better_spawners:guide_book=Better Spawners Guide
+
+better_spawners.guide.title=Better Spawners Guide
+better_spawners.guide.back=Back
+better_spawners.guide.index.intro=Upgradeable spawners for Bedrock. Pick a section:
+better_spawners.guide.general=General
+better_spawners.guide.general.body=§aConvert§r\nRight-click a vanilla mob spawner with a §eDiamond§r after it has spawned at least one mob.\n\n§aMove§r\nMine a Better Spawner with §eSilk Touch§r to keep its type and upgrades. Without Silk Touch, pickaxe breaks drop XP only.\n\n§aChange type§r\nRight-click a Better Spawner with a §eSpawn Egg§r to set the mob type (egg is consumed).
+better_spawners.guide.modifiers=Modifiers
+better_spawners.guide.modifiers.intro=Right-click a Better Spawner with the item to apply. §eSneak§r + right-click reverses the change.

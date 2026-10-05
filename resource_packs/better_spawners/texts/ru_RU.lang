@@ -1,3 +1,12 @@
-item.better_spawners:mob_spawner=Better Spawner
-item.better_spawners:mob_spawner.typed=%s Spawner
-tile.better_spawners:mob_spawner.name=Better Spawner
+item.better_spawners:mob_spawner=Улучшенный спавнер
+item.better_spawners:mob_spawner.typed=Спавнер: %s
+tile.better_spawners:mob_spawner.name=Улучшенный спавнер
+item.better_spawners:guide_book=Гайд Better Spawners
+
+better_spawners.guide.title=Гайд Better Spawners
+better_spawners.guide.back=Назад
+better_spawners.guide.index.intro=Улучшаемые спавнеры для Bedrock. Выбери раздел:
+better_spawners.guide.general=Общее
+better_spawners.guide.general.body=§aКонвертация§r\nПКМ по ванильному спавнеру §eалмазом§r после того, как он заспавнил хотя бы одного моба.\n\n§aПеренос§r\nЛомай Better Spawner с §eSilk Touch§r — тип и апгрейды сохраняются. Без Silk Touch кирка даёт только XP.\n\n§aСмена типа§r\nПКМ по Better Spawner §eяйцом призыва§r меняет тип моба (яйцо тратится).
+better_spawners.guide.modifiers=Модификаторы
+better_spawners.guide.modifiers.intro=ПКМ по Better Spawner предметом применяет апгрейд. §eПрисед§r + ПКМ откатывает изменение.
