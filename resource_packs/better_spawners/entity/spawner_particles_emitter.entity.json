@@ -7,7 +7,7 @@
                 "default": "entity_alphatest"
             },
             "textures": {
-                "default": "textures/blocks/mob_spawner"
+                "default": "textures/blocks/better_mob_spawner"
             },
             "geometry": {
                 "default": "geometry.better_spawners.empty"

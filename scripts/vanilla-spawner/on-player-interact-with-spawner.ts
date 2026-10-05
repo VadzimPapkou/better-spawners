@@ -2,6 +2,7 @@ import { system, world } from "@minecraft/server";
 import { MinecraftItemTypes } from "@minecraft/vanilla-data";
 import { inferredSpawnerTypes } from "./inferred-spawner-types";
 import { BETTER_SPAWNER_ITEM_ID } from "../better-spawner/spawner-constants";
+import { playSpawnerConversionParticles } from "../better-spawner/spawner-particles";
 import { createDefaultBetterSpawnerStats, setBetterSpawnerStats } from "../better-spawner/spawner-stats";
 import { consumeMainhandItem } from "../utils/consume-mainhand-item";
 
@@ -25,7 +26,7 @@ export function initOnPlayerInteractWithSpawner(): void {
 
             block.setType(BETTER_SPAWNER_ITEM_ID);
             setBetterSpawnerStats(block, createDefaultBetterSpawnerStats(spawnerType));
-            player.sendMessage("§aSpawner converted to custom spawner");
+            playSpawnerConversionParticles(block.dimension, block.location);
         });
     });
 }

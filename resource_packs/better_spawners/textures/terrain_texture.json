@@ -5,7 +5,7 @@
     "num_mip_levels": 4,
     "texture_data": {
         "better_spawners:mob_spawner": {
-            "textures": "textures/blocks/mob_spawner"
+            "textures": "textures/blocks/better_mob_spawner"
         }
     }
 }

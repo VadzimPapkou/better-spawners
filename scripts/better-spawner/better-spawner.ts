@@ -94,7 +94,7 @@ export function initBetterSpawner(): void {
                     location: center,
                     maxDistance: spawnerStats.requiredPlayerRange,
                 });
-                const isSpawnerActive = players.length > 0 && (!spawnerStats.redstoneControl || redstonePower > 0);
+                const isSpawnerActive = players.length > 0 && (!spawnerStats.redstoneControl || redstonePower > 0) && !!spawnerStats.mobId;
                 setSpawnerParticlesActive(spawnerBlock.dimension, spawnerBlock.location, isSpawnerActive);
 
                 if (!spawnerStats.mobId) return;
